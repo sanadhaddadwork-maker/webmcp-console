@@ -62,7 +62,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <html lang="en">
-      <body className="text-white min-h-screen font-sans antialiased selection:bg-indigo-500 selection:text-white relative bg-cyber-grid">
+      <body className="text-white min-h-screen font-sans antialiased selection:bg-indigo-500 selection:text-white relative bg-[#030014] bg-[linear-gradient(to_right,#1f293715_1px,transparent_1px),linear-gradient(to_bottom,#1f293715_1px,transparent_1px)] bg-[size:4rem_4rem]">
         
         {/* Reactive Interactive Mouse Aura */}
         <div
@@ -73,7 +73,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
 
         {/* Top Navigation */}
-        <header className="border-b border-indigo-950/80 bg-[#030014]/70 backdrop-blur-md sticky top-0 z-50">
+        <header className="border-b border-indigo-950/80 bg-[#030014]/80 backdrop-blur-md sticky top-0 z-50">
           <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between relative z-10">
             
             {/* Logo & Brand */}
@@ -134,7 +134,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                         <div className="pt-1">
                           <span className="inline-flex items-center space-x-1.5 text-[10px] font-bold text-cyan-300 bg-cyan-950/50 px-2.5 py-1 rounded-full border border-cyan-800/40">
                             <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
-                            <span>{activePlan ? activePlan.name : "Free Developer Tier"}</span>
+                            <span>{activePlan ? activePlan.name : "Free Tier"}</span>
                           </span>
                         </div>
                       </div>
@@ -159,7 +159,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                           onClick={() => setDropdownOpen(false)}
                           className="flex items-center px-4 py-2 text-indigo-200 hover:bg-indigo-950/60 hover:text-white transition-colors"
                         >
-                          ⚡ Upgrade Plan ($29 / $149 / $499)
+                          ⚡ Plans & Pricing ($0 / $29 / $149 / $499)
                         </Link>
                         <Link
                           href="/keys"
@@ -167,13 +167,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                           className="flex items-center px-4 py-2 text-indigo-200 hover:bg-indigo-950/60 hover:text-white transition-colors"
                         >
                           🔑 API Keys & Proxies
-                        </Link>
-                        <Link
-                          href="/settings"
-                          onClick={() => setDropdownOpen(false)}
-                          className="flex items-center px-4 py-2 text-indigo-200 hover:bg-indigo-950/60 hover:text-white transition-colors font-medium"
-                        >
-                          ⚙️ Settings & Workspace
                         </Link>
                       </div>
 
