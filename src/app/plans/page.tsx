@@ -51,7 +51,16 @@ export default function PricingPage() {
       .eq('id', business.id);
 
     if (!error) {
+      // 1. Update local page state
       setBusiness({ ...business, plan: planName });
+
+      // 2. Persist to localStorage
+      localStorage.setItem('active_plan', JSON.stringify({ name: planName }));
+
+      // 3. Broadcast custom event with plan payload for navbar
+      window.dispatchEvent(
+        new CustomEvent('plan_updated', { detail: { plan: planName } })
+      );
     } else {
       console.error('Error updating plan:', error.message);
     }
@@ -93,7 +102,7 @@ export default function PricingPage() {
     <div className="max-w-7xl mx-auto space-y-12 py-6 bg-transparent">
       {/* Header */}
       <header className="border-b border-indigo-950/40 pb-8 text-center space-y-3 bg-transparent">
-        <h1 className="text-4xl font-extrabold tracking-tight text-white">Plans & Pricing</h1>
+        <h1 className="text-4xl font-extrabold tracking-tight text-white">Plans &amp; Pricing</h1>
         <p className="text-gray-300 text-sm max-w-xl mx-auto">
           Choose the right scale for your agent proxy infrastructure with real-time Supabase sync.
         </p>
@@ -109,7 +118,7 @@ export default function PricingPage() {
         )}
       </header>
 
-      {/* Pricing Cards Grid (4 Columns) with completely clear backdrop */}
+      {/* Pricing Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 bg-transparent">
         {plans.map((p) => {
           const isCurrentPlan = business?.plan === p.name;
