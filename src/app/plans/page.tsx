@@ -7,7 +7,6 @@ interface Business {
   id: string;
   business_name: string;
   work_email: string;
-  website_url?: string;
   plan: string;
 }
 
@@ -27,16 +26,24 @@ export default function PricingPage() {
       .from('businesses')
       .select('*')
       .limit(1)
-      .single();
+      .maybeSingle();
 
     if (!error && data) {
       setBusiness(data);
+    } else {
+      // Fallback default if row is missing
+      setBusiness({
+        id: 'default',
+        business_name: 'Acme Corp',
+        work_email: 'admin@webmcp.io',
+        plan: 'Free Tier',
+      });
     }
     setLoading(false);
   }
 
   async function handleSelectPlan(planName: string) {
-    if (!business) return;
+    if (!business || business.id === 'default') return;
     setUpdating(true);
 
     const { error } = await supabase
@@ -57,19 +64,26 @@ export default function PricingPage() {
       name: 'Free Tier',
       price: '$0',
       period: '/month',
-      description: 'Ideal for testing & early prototype agents.',
-      features: ['Up to 10,000 requests/mo', '1 Active API Key', 'Community Support'],
+      description: 'Default starting tier for new accounts & testing agents.',
+      features: ['Up to 10,000 requests/mo', '1 Active API Key', 'Community Support', 'Standard Edge Routing'],
+    },
+    {
+      name: 'Starter',
+      price: '$29',
+      period: '/month',
+      description: 'Perfect for growing agents and early production setups.',
+      features: ['Up to 100,000 requests/mo', '5 Active API Keys', 'Email Support', 'Global Edge Proxy'],
     },
     {
       name: 'Pro Tier',
-      price: '$49',
+      price: '$149',
       period: '/month',
-      description: 'Built for scaling production proxy traffic.',
-      features: ['Up to 500,000 requests/mo', 'Unlimited API Keys', 'Priority Regional Edge Routing', '24/7 Support'],
+      description: 'Built for scaling heavy production proxy traffic.',
+      features: ['Up to 500,000 requests/mo', 'Unlimited API Keys', 'Priority Regional Edge Routing', '24/7 Priority Support'],
     },
     {
       name: 'Enterprise',
-      price: '$199',
+      price: '$499',
       period: '/month',
       description: 'Custom SLA, dedicated infrastructure, & zero limits.',
       features: ['Unlimited requests', 'Dedicated Cloudflare Workers', 'Custom Schema Validation', 'Dedicated Account Manager'],
@@ -77,46 +91,54 @@ export default function PricingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-black text-white p-8 max-w-6xl mx-auto space-y-8">
-      <header className="border-b border-gray-800 pb-6 text-center">
+    <div className="min-h-screen bg-black bg-[linear-gradient(to_right,#1f293715_1px,transparent_1px),linear-gradient(to_bottom,#1f293715_1px,transparent_1px)] bg-[size:4rem_4rem] text-white p-8 max-w-7xl mx-auto space-y-12">
+      {/* Header */}
+      <header className="border-b border-gray-800 pb-8 text-center space-y-3">
         <h1 className="text-4xl font-extrabold tracking-tight">Plans & Pricing</h1>
-        <p className="text-gray-400 mt-2">
-          Choose the right scale for your agent proxy infrastructure.
+        <p className="text-gray-400 text-sm max-w-xl mx-auto">
+          Choose the right scale for your agent proxy infrastructure with real-time Supabase sync.
         </p>
         {business && (
-          <div className="mt-4 inline-block bg-gray-900 border border-gray-800 rounded-full px-4 py-1.5 text-xs text-gray-300">
-            Account: <strong className="text-white">{business.business_name}</strong> ({business.work_email}) — Active Plan: <span className="text-emerald-400 font-semibold">{business.plan}</span>
+          <div className="inline-flex items-center gap-2 bg-gray-900/90 border border-gray-800 rounded-full px-5 py-2 text-xs text-gray-300 shadow-xl">
+            <span>Account:</span>
+            <strong className="text-white">{business.business_name}</strong>
+            <span className="text-gray-500">({business.work_email})</span>
+            <span className="text-gray-600">|</span>
+            <span>Active Plan:</span>
+            <span className="text-emerald-400 font-semibold">{business.plan}</span>
           </div>
         )}
       </header>
 
-      {/* Pricing Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {/* Pricing Cards Grid (4 Columns) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {plans.map((p) => {
           const isCurrentPlan = business?.plan === p.name;
 
           return (
             <div
               key={p.name}
-              className={`bg-gray-900/60 border rounded-2xl p-6 flex flex-col justify-between transition ${
-                isCurrentPlan ? 'border-emerald-500 ring-1 ring-emerald-500' : 'border-gray-800 hover:border-gray-700'
+              className={`bg-gray-900/80 backdrop-blur-md border rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 ${
+                isCurrentPlan
+                  ? 'border-emerald-500 ring-2 ring-emerald-500/20 shadow-2xl shadow-emerald-500/10'
+                  : 'border-gray-800 hover:border-gray-700 hover:bg-gray-900'
               }`}
             >
               <div>
                 <div className="flex justify-between items-center">
-                  <h3 className="text-xl font-bold">{p.name}</h3>
+                  <h3 className="text-lg font-bold">{p.name}</h3>
                   {isCurrentPlan && (
-                    <span className="text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded-full font-semibold">
+                    <span className="text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-800/60 px-2 py-0.5 rounded-full font-semibold">
                       CURRENT PLAN
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-gray-400 mt-2 min-h-[32px]">{p.description}</p>
+                <p className="text-xs text-gray-400 mt-3 min-h-[40px]">{p.description}</p>
                 <div className="mt-4 mb-6">
                   <span className="text-4xl font-extrabold">{p.price}</span>
                   <span className="text-xs text-gray-500">{p.period}</span>
                 </div>
-                <ul className="space-y-2 text-xs text-gray-300 border-t border-gray-800/80 pt-4">
+                <ul className="space-y-2.5 text-xs text-gray-300 border-t border-gray-800/80 pt-4">
                   {p.features.map((f, i) => (
                     <li key={i} className="flex items-center gap-2">
                       <span className="text-emerald-400 font-bold">✓</span> {f}
@@ -128,10 +150,10 @@ export default function PricingPage() {
               <button
                 disabled={updating || isCurrentPlan || loading}
                 onClick={() => handleSelectPlan(p.name)}
-                className={`w-full mt-8 py-2.5 rounded-xl font-semibold text-xs transition ${
+                className={`w-full mt-8 py-2.5 rounded-xl font-semibold text-xs transition-all ${
                   isCurrentPlan
-                    ? 'bg-gray-800 text-gray-400 cursor-not-allowed'
-                    : 'bg-white text-black hover:bg-gray-200'
+                    ? 'bg-emerald-950/40 text-emerald-400 border border-emerald-800/50 cursor-not-allowed'
+                    : 'bg-white text-black hover:bg-gray-200 shadow-lg'
                 }`}
               >
                 {updating ? 'Updating...' : isCurrentPlan ? 'Active Plan' : `Switch to ${p.name}`}
