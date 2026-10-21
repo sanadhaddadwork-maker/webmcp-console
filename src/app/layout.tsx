@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabaseBrowser";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<any>(null);
-  const [activePlan, setActivePlan] = useState<any>(null);
+  const [activePlan, setActivePlan] = useState<string>("Free Tier");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -17,6 +17,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const supabase = createClient();
 
   useEffect(() => {
+    // 1. Fetch User Auth or Mock
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) {
         setUser(user);
@@ -29,8 +30,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       if (mockUser) setUser(JSON.parse(mockUser));
     });
 
-    const plan = localStorage.getItem("active_plan");
-    if (plan) setActivePlan(JSON.parse(plan));
+    // 2. Sync Active Plan directly from Supabase DB
+    fetchLatestPlan();
+
+    // 3. Listen for plan updates broadcast across components
+    const handlePlanUpdate = () => fetchLatestPlan();
+    window.addEventListener("plan_updated", handlePlanUpdate);
 
     const handleClickOutside = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -44,18 +49,33 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
     document.addEventListener("mousedown", handleClickOutside);
     window.addEventListener("mousemove", handleMouseMove);
+    
     return () => {
+      window.removeEventListener("plan_updated", handlePlanUpdate);
       document.removeEventListener("mousedown", handleClickOutside);
       window.removeEventListener("mousemove", handleMouseMove);
     };
   }, []);
+
+  async function fetchLatestPlan() {
+    const { data, error } = await supabase
+      .from("businesses")
+      .select("plan")
+      .limit(1)
+      .maybeSingle();
+
+    if (!error && data?.plan) {
+      setActivePlan(data.plan);
+      localStorage.setItem("active_plan", JSON.stringify({ name: data.plan }));
+    }
+  }
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     localStorage.removeItem("mock_user");
     localStorage.removeItem("active_plan");
     setUser(null);
-    setActivePlan(null);
+    setActivePlan("Free Tier");
     setDropdownOpen(false);
     router.push("/login");
   };
@@ -95,7 +115,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               {/* Navigation Links */}
               <nav className="hidden md:flex items-center space-x-7 text-[13px] font-bold text-indigo-100">
                 <Link href="/" className="hover:text-cyan-400 transition-colors">Home</Link>
-                <Link href="/plans" className="hover:text-cyan-400 transition-colors">Plans & Pricing</Link>
+                <Link href="/plans" className="hover:text-cyan-400 transition-colors">Plans &amp; Pricing</Link>
                 <Link href="/keys" className="hover:text-cyan-400 transition-colors">API Keys</Link>
                 <Link href="/analytics" className="hover:text-cyan-400 transition-colors">Telemetry</Link>
               </nav>
@@ -119,7 +139,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                         {user.email}
                       </span>
                       <span className="text-[10px] text-cyan-400 font-medium block">
-                        {activePlan ? activePlan.name : "Free Tier"}
+                        {activePlan}
                       </span>
                     </div>
                     <span className="text-indigo-400 text-xs">▼</span>
@@ -134,7 +154,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                         <div className="pt-1">
                           <span className="inline-flex items-center space-x-1.5 text-[10px] font-bold text-cyan-300 bg-cyan-950/50 px-2.5 py-1 rounded-full border border-cyan-800/40">
                             <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
-                            <span>{activePlan ? activePlan.name : "Free Tier"}</span>
+                            <span>{activePlan}</span>
                           </span>
                         </div>
                       </div>
@@ -152,21 +172,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                           onClick={() => setDropdownOpen(false)}
                           className="flex items-center px-4 py-2 text-indigo-200 hover:bg-indigo-950/60 hover:text-white transition-colors"
                         >
-                          📊 Telemetry & Analytics
+                          📊 Telemetry &amp; Analytics
                         </Link>
                         <Link
                           href="/plans"
                           onClick={() => setDropdownOpen(false)}
                           className="flex items-center px-4 py-2 text-indigo-200 hover:bg-indigo-950/60 hover:text-white transition-colors"
                         >
-                          ⚡ Plans & Pricing ($0 / $29 / $149 / $499)
+                          ⚡ Plans &amp; Pricing ($0 / $29 / $149 / $499)
                         </Link>
                         <Link
                           href="/keys"
                           onClick={() => setDropdownOpen(false)}
                           className="flex items-center px-4 py-2 text-indigo-200 hover:bg-indigo-950/60 hover:text-white transition-colors"
                         >
-                          🔑 API Keys & Proxies
+                          🔑 API Keys &amp; Proxies
                         </Link>
                       </div>
 
