@@ -31,7 +31,6 @@ export default function PricingPage() {
     if (!error && data) {
       setBusiness(data);
     } else {
-      // Fallback default if row is missing
       setBusiness({
         id: 'default',
         business_name: 'Acme Corp',
@@ -91,21 +90,21 @@ export default function PricingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-black bg-[linear-gradient(to_right,#1f293715_1px,transparent_1px),linear-gradient(to_bottom,#1f293715_1px,transparent_1px)] bg-[size:4rem_4rem] text-white p-8 max-w-7xl mx-auto space-y-12">
+    <div className="max-w-7xl mx-auto space-y-12 py-6">
       {/* Header */}
-      <header className="border-b border-gray-800 pb-8 text-center space-y-3">
-        <h1 className="text-4xl font-extrabold tracking-tight">Plans & Pricing</h1>
-        <p className="text-gray-400 text-sm max-w-xl mx-auto">
+      <header className="border-b border-indigo-950/80 pb-8 text-center space-y-3">
+        <h1 className="text-4xl font-extrabold tracking-tight text-white">Plans & Pricing</h1>
+        <p className="text-gray-300 text-sm max-w-xl mx-auto">
           Choose the right scale for your agent proxy infrastructure with real-time Supabase sync.
         </p>
         {business && (
-          <div className="inline-flex items-center gap-2 bg-gray-900/90 border border-gray-800 rounded-full px-5 py-2 text-xs text-gray-300 shadow-xl">
+          <div className="inline-flex items-center gap-2 bg-[#090520]/90 border border-indigo-900/80 rounded-full px-5 py-2 text-xs text-indigo-200 shadow-xl backdrop-blur-md">
             <span>Account:</span>
             <strong className="text-white">{business.business_name}</strong>
-            <span className="text-gray-500">({business.work_email})</span>
-            <span className="text-gray-600">|</span>
+            <span className="text-indigo-400">({business.work_email})</span>
+            <span className="text-indigo-800">|</span>
             <span>Active Plan:</span>
-            <span className="text-emerald-400 font-semibold">{business.plan}</span>
+            <span className="text-cyan-400 font-semibold">{business.plan}</span>
           </div>
         )}
       </header>
@@ -118,30 +117,30 @@ export default function PricingPage() {
           return (
             <div
               key={p.name}
-              className={`bg-gray-900/80 backdrop-blur-md border rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 ${
+              className={`bg-[#090520]/80 backdrop-blur-xl border rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 ${
                 isCurrentPlan
-                  ? 'border-emerald-500 ring-2 ring-emerald-500/20 shadow-2xl shadow-emerald-500/10'
-                  : 'border-gray-800 hover:border-gray-700 hover:bg-gray-900'
+                  ? 'border-cyan-500 ring-2 ring-cyan-500/20 shadow-2xl shadow-cyan-500/10'
+                  : 'border-indigo-900/60 hover:border-indigo-700 hover:bg-[#090520]'
               }`}
             >
               <div>
                 <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-bold">{p.name}</h3>
+                  <h3 className="text-lg font-bold text-white">{p.name}</h3>
                   {isCurrentPlan && (
-                    <span className="text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-800/60 px-2 py-0.5 rounded-full font-semibold">
+                    <span className="text-[10px] bg-cyan-950 text-cyan-300 border border-cyan-800/60 px-2 py-0.5 rounded-full font-semibold">
                       CURRENT PLAN
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-gray-400 mt-3 min-h-[40px]">{p.description}</p>
+                <p className="text-xs text-gray-300 mt-3 min-h-[40px]">{p.description}</p>
                 <div className="mt-4 mb-6">
-                  <span className="text-4xl font-extrabold">{p.price}</span>
-                  <span className="text-xs text-gray-500">{p.period}</span>
+                  <span className="text-4xl font-extrabold text-white">{p.price}</span>
+                  <span className="text-xs text-gray-400">{p.period}</span>
                 </div>
-                <ul className="space-y-2.5 text-xs text-gray-300 border-t border-gray-800/80 pt-4">
+                <ul className="space-y-2.5 text-xs text-gray-300 border-t border-indigo-950 pt-4">
                   {p.features.map((f, i) => (
                     <li key={i} className="flex items-center gap-2">
-                      <span className="text-emerald-400 font-bold">✓</span> {f}
+                      <span className="text-cyan-400 font-bold">✓</span> {f}
                     </li>
                   ))}
                 </ul>
@@ -152,7 +151,7 @@ export default function PricingPage() {
                 onClick={() => handleSelectPlan(p.name)}
                 className={`w-full mt-8 py-2.5 rounded-xl font-semibold text-xs transition-all ${
                   isCurrentPlan
-                    ? 'bg-emerald-950/40 text-emerald-400 border border-emerald-800/50 cursor-not-allowed'
+                    ? 'bg-cyan-950/40 text-cyan-300 border border-cyan-800/50 cursor-not-allowed'
                     : 'bg-white text-black hover:bg-gray-200 shadow-lg'
                 }`}
               >
