@@ -70,7 +70,7 @@ export default function HomePage() {
       {/* How WebMCP Works */}
       <section className="space-y-12">
         <div className="text-center space-y-3 max-w-2xl mx-auto">
-          <h2 className="text-3xl font-extrabold text-white">How WebMCP Bridges Websites & AI Agents</h2>
+          <h2 className="text-3xl font-extrabold text-white">How WebMCP Bridges Websites &amp; AI Agents</h2>
           <p className="text-gray-300 text-sm">
             Traditional web endpoints are designed for human HTML rendering. WebMCP exposes machine-readable JSON schemas designed specifically for autonomous LLM tool calling.
           </p>
@@ -84,7 +84,7 @@ export default function HomePage() {
             </div>
             <h3 className="text-xl font-bold text-white">Declare Schema</h3>
             <p className="text-xs text-gray-300 leading-relaxed">
-              Define your site's capabilities—from e-commerce checkout to data queries—using standardized WebMCP JSON schemas.
+              Define your site&apos;s capabilities—from e-commerce checkout to data queries—using standardized WebMCP JSON schemas.
             </p>
           </div>
 
@@ -95,7 +95,7 @@ export default function HomePage() {
             </div>
             <h3 className="text-xl font-bold text-white">Proxy Authentication</h3>
             <p className="text-xs text-gray-300 leading-relaxed">
-              Authenticate requests through secure `mcp_live_` API keys, backed by instant Supabase authorization & token rate limiting.
+              Authenticate requests through secure `mcp_live_` API keys, backed by instant Supabase authorization &amp; token rate limiting.
             </p>
           </div>
 
@@ -118,7 +118,7 @@ export default function HomePage() {
           <span className="text-[11px] font-mono bg-cyan-950 text-cyan-300 px-3 py-1 rounded-full border border-cyan-800/40 uppercase">
             Developer Integration
           </span>
-          <h2 className="text-3xl font-extrabold text-white">Simple & Deterministic Integration</h2>
+          <h2 className="text-3xl font-extrabold text-white">Simple &amp; Deterministic Integration</h2>
           <p className="text-gray-300 text-sm leading-relaxed">
             Add WebMCP headers to your existing API endpoints. Agents discover your site capabilities via `/.well-known/mcp.json` and execute structured actions safely.
           </p>
@@ -129,4 +129,29 @@ export default function HomePage() {
             >
               <span>Generate WebMCP Keys</span>
               <span>→</span>
-            </Link
+            </Link>
+          </div>
+        </div>
+
+        {/* Code Snippet Box */}
+        <div className="bg-[#030014]/90 border border-indigo-900/80 rounded-2xl p-6 font-mono text-xs text-indigo-300 shadow-2xl space-y-3 overflow-x-auto">
+          <div className="flex items-center justify-between pb-3 border-b border-indigo-950">
+            <span className="text-gray-500">/.well-known/mcp.json</span>
+            <span className="text-cyan-400 font-semibold">WebMCP Schema</span>
+          </div>
+          <p className="text-gray-500">// Standardized Agent Tool manifest</p>
+          <p>{'{'}</p>
+          <p className="pl-4 text-cyan-300">&quot;mcpVersion&quot;: <span className="text-emerald-400">&quot;1.0.0&quot;</span>,</p>
+          <p className="pl-4 text-cyan-300">&quot;tools&quot;: [</p>
+          <p className="pl-8">{'{'}</p>
+          <p className="pl-12 text-purple-400">&quot;name&quot;: <span className="text-emerald-400">&quot;search_products&quot;</span>,</p>
+          <p className="pl-12 text-purple-400">&quot;description&quot;: <span className="text-emerald-400">&quot;Query live catalog items for LLM agents&quot;</span>,</p>
+          <p className="pl-12 text-purple-400">&quot;endpoint&quot;: <span className="text-emerald-400">&quot;https://api.yoursite.com/mcp/search&quot;</span></p>
+          <p className="pl-8">{'}'}</p>
+          <p className="pl-4">]</p>
+          <p>{'}'}</p>
+        </div>
+      </section>
+    </div>
+  );
+}
