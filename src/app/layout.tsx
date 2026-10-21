@@ -30,11 +30,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       if (mockUser) setUser(JSON.parse(mockUser));
     });
 
-    // 2. Sync Active Plan directly from Supabase DB
+    // 2. Sync Active Plan directly from Supabase DB on load
     fetchLatestPlan();
 
-    // 3. Listen for plan updates broadcast across components
-    const handlePlanUpdate = () => fetchLatestPlan();
+    // 3. Instant event listener for plan changes
+    const handlePlanUpdate = (e: any) => {
+      if (e.detail?.plan) {
+        setActivePlan(e.detail.plan);
+      } else {
+        fetchLatestPlan();
+      }
+    };
+
     window.addEventListener("plan_updated", handlePlanUpdate);
 
     const handleClickOutside = (e: MouseEvent) => {
