@@ -1,8 +1,12 @@
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { createBrowserClient } from '@supabase/ssr';
 
 export function createClient() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.dummy";
+  const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const rawKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  return createSupabaseClient(supabaseUrl, supabaseAnonKey);
+  // Ensure it's a valid HTTP/HTTPS URL, otherwise use a safe placeholder for static pre-rendering
+  const supabaseUrl = (rawUrl && rawUrl.startsWith('http')) ? rawUrl : 'https://placeholder.supabase.co';
+  const supabaseAnonKey = (rawKey && rawKey.length > 5) ? rawKey : 'placeholder-key';
+
+  return createBrowserClient(supabaseUrl, supabaseAnonKey);
 }
