@@ -18,108 +18,131 @@ export default function ApiKeysPage() {
   const supabase = createClient();
 
   useEffect(() => {
-    fetchKeys();
-  }, []);
+    let isMounted = true;
 
-  async function fetchKeys() {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from('api_keys')
-      .select('*')
-      .order('created_at', { ascending: false });
+    async function fetchKeys() {
+      try {
+        const { data, error } = await supabase
+          .from('api_keys')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(50); // Prevent heavy rendering loads
 
-    if (!error && data) {
-      setKeys(data);
+        if (!error && data && isMounted) {
+          setKeys(data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch keys:', err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
     }
-    setLoading(false);
-  }
+
+    fetchKeys();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [supabase]);
 
   async function generateKey(e: React.FormEvent) {
     e.preventDefault();
-    if (!labelInput.trim()) return;
+    if (!labelInput.trim() || creating) return;
 
     setCreating(true);
     const generatedKey = `mcp_live_${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`;
 
-    const { data, error } = await supabase
-      .from('api_keys')
-      .insert([{ key_label: labelInput, api_key: generatedKey }])
-      .select();
+    try {
+      const { data, error } = await supabase
+        .from('api_keys')
+        .insert([{ key_label: labelInput.trim(), api_key: generatedKey }])
+        .select();
 
-    if (!error && data) {
-      setKeys([data[0], ...keys]);
-      setLabelInput('');
-    } else if (error) {
-      alert(`Error creating key: ${error.message}`);
+      if (!error && data) {
+        setKeys((prev) => [data[0], ...prev]);
+        setLabelInput('');
+      } else if (error) {
+        alert(`Error creating key: ${error.message}`);
+      }
+    } catch (err: any) {
+      alert(`Unexpected error: ${err.message}`);
+    } finally {
+      setCreating(false);
     }
-    setCreating(false);
   }
 
   async function deleteKey(id: string) {
-    const { error } = await supabase.from('api_keys').delete().eq('id', id);
-    if (!error) {
-      setKeys(keys.filter((key) => key.id !== id));
-    } else {
-      alert(`Error deleting key: ${error.message}`);
+    try {
+      const { error } = await supabase.from('api_keys').delete().eq('id', id);
+      if (!error) {
+        setKeys((prev) => prev.filter((key) => key.id !== id));
+      } else {
+        alert(`Error deleting key: ${error.message}`);
+      }
+    } catch (err: any) {
+      alert(`Unexpected error: ${err.message}`);
     }
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-8 text-white">
-      <header className="border-b border-gray-800 pb-4">
-        <h1 className="text-2xl font-bold tracking-tight">API Key Management</h1>
-        <p className="text-sm text-gray-400 mt-1">
-          Create and manage access keys for your WebMCP agent integrations.
+    <div className="max-w-4xl mx-auto py-12 px-6 space-y-8">
+      {/* Header */}
+      <div className="border-b border-indigo-950 pb-6">
+        <h1 className="text-3xl font-extrabold text-white tracking-tight">API Key Management</h1>
+        <p className="text-indigo-200/70 text-sm mt-1">
+          Create and manage secure access keys for your WebMCP agent integrations.
         </p>
-      </header>
+      </div>
 
-      <form onSubmit={generateKey} className="flex gap-3 bg-gray-900 p-4 rounded-xl border border-gray-800">
+      {/* Generator Form */}
+      <form onSubmit={generateKey} className="flex gap-3 bg-[#0b0f29]/80 p-5 rounded-2xl border border-indigo-900/50 backdrop-blur-md shadow-xl">
         <input
           type="text"
           placeholder="Key Label (e.g., Development Agent)"
           value={labelInput}
           onChange={(e) => setLabelInput(e.target.value)}
-          className="flex-1 bg-black border border-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-blue-500"
+          className="flex-1 bg-[#030014] border border-indigo-800/60 rounded-xl px-4 py-2.5 text-xs text-white placeholder-indigo-400/50 focus:outline-none focus:border-cyan-400 transition"
           required
         />
         <button
           type="submit"
           disabled={creating}
-          className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-medium text-sm px-5 py-2 rounded-lg transition"
+          className="bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 disabled:opacity-50 text-white font-bold text-xs px-6 py-2.5 rounded-xl transition shadow-lg shadow-indigo-600/30 whitespace-nowrap"
         >
           {creating ? 'Generating...' : '+ Generate New Key'}
         </button>
       </form>
 
-      <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-800 font-semibold text-sm text-gray-300">
+      {/* Keys Table Container */}
+      <div className="bg-[#0b0f29]/80 border border-indigo-900/50 rounded-2xl overflow-hidden backdrop-blur-md shadow-xl">
+        <div className="px-6 py-4 border-b border-indigo-950 font-bold text-xs text-indigo-300 uppercase tracking-wider">
           Your Active Keys
         </div>
 
         {loading ? (
-          <div className="p-6 text-center text-sm text-gray-500">Loading keys...</div>
+          <div className="p-8 text-center text-xs text-indigo-400 animate-pulse">Loading active keys...</div>
         ) : keys.length === 0 ? (
-          <div className="p-6 text-center text-sm text-gray-500">
+          <div className="p-8 text-center text-xs text-indigo-400/70">
             No API keys found. Generate one above to get started!
           </div>
         ) : (
-          <div className="divide-y divide-gray-800">
+          <div className="divide-y divide-indigo-950/60">
             {keys.map((key) => (
-              <div key={key.id} className="p-4 flex items-center justify-between gap-4 hover:bg-gray-800/40 transition">
+              <div key={key.id} className="p-5 flex items-center justify-between gap-4 hover:bg-indigo-950/30 transition">
                 <div>
-                  <div className="font-medium text-sm text-white">{key.key_label}</div>
-                  <code className="text-xs text-blue-400 bg-blue-950/40 px-2 py-0.5 rounded mt-1 inline-block border border-blue-800/40">
+                  <div className="font-semibold text-sm text-white">{key.key_label}</div>
+                  <code className="text-[11px] font-mono text-cyan-300 bg-cyan-950/50 px-2.5 py-1 rounded-lg mt-1.5 inline-block border border-cyan-800/40">
                     {key.api_key}
                   </code>
                 </div>
 
-                <div className="flex items-center gap-4">
-                  <span className="text-xs text-gray-500">
+                <div className="flex items-center gap-6">
+                  <span className="text-[11px] text-indigo-400/70">
                     {new Date(key.created_at).toLocaleDateString()}
                   </span>
                   <button
                     onClick={() => deleteKey(key.id)}
-                    className="text-xs text-red-400 hover:text-red-300 px-2 py-1 rounded bg-red-950/30 hover:bg-red-900/50 border border-red-900/40 transition"
+                    className="text-xs text-rose-400 hover:text-rose-300 px-3 py-1.5 rounded-lg bg-rose-950/30 hover:bg-rose-900/50 border border-rose-900/40 transition font-medium"
                   >
                     Delete
                   </button>
