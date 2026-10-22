@@ -213,3 +213,56 @@ export default function SettingsPage() {
                 </div>
               </div>
             </div>
+          )}
+
+          {/* TAB 3: REGION & LANGUAGE */}
+          {activeTab === 'region' && (
+            <div className="bg-[#0b0f29]/80 p-6 md:p-8 rounded-2xl border border-indigo-900/50 backdrop-blur-md shadow-xl space-y-6">
+              <div>
+                <h2 className="text-lg font-bold text-white">Region & Language</h2>
+                <p className="text-xs text-indigo-300/70 mt-0.5">Configure edge routing zones, console language, and local timezones.</p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-indigo-300 uppercase tracking-wider">Default Proxy Edge Node</label>
+                <select
+                  value={proxyRegion}
+                  onChange={(e) => setProxyRegion(e.target.value)}
+                  className="w-full bg-[#030014] border border-indigo-800/60 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-400 transition"
+                >
+                  <option value="auto-edge">Auto-Edge (Global Lowest Latency)</option>
+                  <option value="me-central">Middle East Central (Amman / Dubai)</option>
+                  <option value="eu-west">Europe West (Frankfurt / London)</option>
+                  <option value="us-east">US East (N. Virginia)</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-indigo-300 uppercase tracking-wider">Timezone</label>
+                <select
+                  value={timezone}
+                  onChange={(e) => setTimezone(e.target.value)}
+                  className="w-full bg-[#030014] border border-indigo-800/60 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-400 transition"
+                >
+                  <option value="UTC+3">UTC+3 (Amman / Middle East)</option>
+                  <option value="UTC">UTC (Coordinated Universal Time)</option>
+                  <option value="UTC-5">UTC-5 (Eastern Time - US)</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-indigo-300 uppercase tracking-wider">Console Language</label>
+                <select
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value)}
+                  className="w-full bg-[#030014] border border-indigo-800/60 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-400 transition"
+                >
+                  <option value="English">English (US)</option>
+                  <option value="Arabic">العربية (Arabic)</option>
+                </select>
+              </div>
+
+              <div className="pt-4 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => alert('Preferences updated successfully
