@@ -9,7 +9,7 @@ const supabase = createClient();
 export default function SettingsPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
-  const [tab, setTab] = useState<'profile' | 'billing' | 'region' | 'security' | 'terms'>('profile');
+  const [tab, setTab] = useState<'profile' | 'billing' | 'region' | 'security' | 'terms'>('region');
   const [fullName, setFullName] = useState('');
   const [username, setUsername] = useState('');
   const [bizName, setBizName] = useState('');
@@ -23,6 +23,17 @@ export default function SettingsPage() {
   const [msg, setMsg] = useState('');
 
   useEffect(() => {
+    // 1. Auto-detect browser timezone
+    try {
+      const detectedTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      if (detectedTz) {
+        setTz(detectedTz);
+      }
+    } catch (e) {
+      console.error('Timezone detection failed:', e);
+    }
+
+    // 2. Load user session and profile from Supabase
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) { router.replace('/login'); return; }
       setUser(data.user);
@@ -90,11 +101,50 @@ export default function SettingsPage() {
 
           {tab === 'region' && (
             <div className="bg-[#0b0f29] p-8 rounded-2xl border border-indigo-900 space-y-6">
-              <h2 className="text-lg font-bold">Region & Language Preferences</h2>
-              <div><label className="block text-xs font-bold text-indigo-300 uppercase mb-2">Edge Node</label><select value={region} onChange={(e) => setRegion(e.target.value)} className="w-full bg-[#030014] border border-indigo-800 rounded-xl px-4 py-3 text-xs text-white"><option value="auto-edge">Auto-Edge (Global Lowest Latency)</option><option value="me-central">Middle East Central (Amman / Dubai)</option></select></div>
-              <div><label className="block text-xs font-bold text-indigo-300 uppercase mb-2">Timezone</label><select value={tz} onChange={(e) => setTz(e.target.value)} className="w-full bg-[#030014] border border-indigo-800 rounded-xl px-4 py-3 text-xs text-white"><option value="UTC+3">UTC+3 (Amman, Riyadh)</option><option value="UTC">UTC (Universal Time)</option></select></div>
-              <div><label className="block text-xs font-bold text-indigo-300 uppercase mb-2">Language</label><select value={lang} onChange={(e) => setLang(e.target.value)} className="w-full bg-[#030014] border border-indigo-800 rounded-xl px-4 py-3 text-xs text-white"><option value="English">English (US)</option><option value="Arabic">العربية (Arabic)</option></select></div>
-              <button onClick={() => alert('Preferences saved!')} className="bg-indigo-600 text-white font-bold text-xs px-6 py-3 rounded-xl">Save Preferences</button>
+              <div className="flex justify-between items-center">
+                <h2 className="text-lg font-bold">Global Region & Language Configuration</h2>
+                <span className="text-[10px] font-mono bg-cyan-950/80 text-cyan-400 border border-cyan-800 px-2.5 py-1 rounded-lg">Auto-Detected</span>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-indigo-300 uppercase mb-2">Primary Edge Proxy Routing Node</label>
+                <select value={region} onChange={(e) => setRegion(e.target.value)} className="w-full bg-[#030014] border border-indigo-800 rounded-xl px-4 py-3 text-xs text-white">
+                  <option value="auto-edge">🌐 Auto-Edge (Global Lowest Latency Anycast)</option>
+                  <option value="me-central">📍 Middle East Central (Amman / Riyadh / Dubai - me-central-1)</option>
+                  <option value="eu-west-1">📍 Europe West (Frankfurt / London / Paris - eu-west-1)</option>
+                  <option value="eu-north-1">📍 Europe North (Stockholm / Helsinki - eu-north-1)</option>
+                  <option value="us-east-1">📍 US East (N. Virginia / Ohio - us-east-1)</option>
+                  <option value="us-west-2">📍 US West (Oregon / California - us-west-2)</option>
+                  <option value="ap-southeast-1">📍 Asia Pacific (Singapore / Tokyo / Sydney - ap-southeast-1)</option>
+                  <option value="ap-south-1">📍 South Asia (Mumbai / Delhi - ap-south-1)</option>
+                  <option value="sa-east-1">📍 South America (São Paulo - sa-east-1)</option>
+                  <option value="af-south-1">📍 Africa (Cape Town / Johannesburg - af-south-1)</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-indigo-300 uppercase mb-2">System Timezone (Auto-Detected from Browser)</label>
+                <select value={tz} onChange={(e) => setTz(e.target.value)} className="w-full bg-[#030014] border border-indigo-800 rounded-xl px-4 py-3 text-xs text-white">
+                  <option value={tz}>{tz} (Detected Browser Timezone)</option>
+                  <option value="Asia/Amman">Asia/Amman (UTC+3)</option>
+                  <option value="UTC">UTC (Coordinated Universal Time)</option>
+                  <option value="America/New_York">America/New_York (UTC-5)</option>
+                  <option value="Europe/London">Europe/London (UTC+0)</option>
+                  <option value="Europe/Berlin">Europe/Berlin (UTC+1)</option>
+                  <option value="Asia/Dubai">Asia/Dubai (UTC+4)</option>
+                  <option value="Asia/Tokyo">Asia/Tokyo (UTC+9)</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-indigo-300 uppercase mb-2">Console Interface Language</label>
+                <select value={lang} onChange={(e) => setLang(e.target.value)} className="w-full bg-[#030014] border border-indigo-800 rounded-xl px-4 py-3 text-xs text-white">
+                  <option value="English">English (US / Global)</option>
+                  <option value="Arabic">العربية (Arabic)</option>
+                  <option value="Spanish">Español (Spanish)</option>
+                  <option value="French">Français (French)</option>
+                  <option value="German">Deutsch (German)</option>
+                  <option value="Turkish">Türkçe (Turkish)</option>
+                </select>
+              </div>
+              <button onClick={() => alert('Regional preferences saved!')} className="bg-indigo-600 text-white font-bold text-xs px-6 py-3 rounded-xl">Save Regional Preferences</button>
             </div>
           )}
 
@@ -111,7 +161,7 @@ export default function SettingsPage() {
                 <h2 className="text-lg font-bold text-rose-400">Danger Zone</h2>
                 <div className="flex justify-between items-center p-4 rounded-xl bg-[#030014] border border-rose-900/50">
                   <div><p className="text-xs font-bold">Delete Account & Data</p><p className="text-[11px] text-rose-300">Irreversible erasure of all logs and keys.</p></div>
-                  <button onClick={() => setShowDel(true)} className="bg-rose-600 text-white font-bold text-xs px-4 py-2.5 rounded-xl">Delete Account</button>
+                  <button onClick={() => setShowDel(true)} className="bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl">Delete Account</button>
                 </div>
               </div>
             </div>
