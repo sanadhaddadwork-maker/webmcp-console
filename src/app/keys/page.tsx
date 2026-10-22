@@ -16,6 +16,7 @@ export default function ApiKeysPage() {
   const [labelInput, setLabelInput] = useState('');
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const router = useRouter();
   const supabase = createClient();
 
@@ -104,6 +105,12 @@ export default function ApiKeysPage() {
     }
   }
 
+  const copyToClipboard = (keyStr: string) => {
+    navigator.clipboard.writeText(keyStr);
+    setCopiedKey(keyStr);
+    setTimeout(() => setCopiedKey(null), 2000);
+  };
+
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
@@ -116,7 +123,7 @@ export default function ApiKeysPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto py-12 px-6 space-y-8">
+    <div className="max-w-4xl mx-auto py-12 px-6 space-y-10">
       {/* Header */}
       <div className="border-b border-indigo-950 pb-6">
         <h1 className="text-3xl font-extrabold text-white tracking-tight">API Key Management</h1>
@@ -160,9 +167,18 @@ export default function ApiKeysPage() {
               <div key={key.id} className="p-5 flex items-center justify-between gap-4 hover:bg-indigo-950/30 transition">
                 <div>
                   <div className="font-semibold text-sm text-white">{key.key_label}</div>
-                  <code className="text-[11px] font-mono text-cyan-300 bg-cyan-950/50 px-2.5 py-1 rounded-lg mt-1.5 inline-block border border-cyan-800/40">
-                    {key.api_key}
-                  </code>
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <code className="text-[11px] font-mono text-cyan-300 bg-cyan-950/50 px-2.5 py-1 rounded-lg border border-cyan-800/40">
+                      {key.api_key}
+                    </code>
+                    <button
+                      type="button"
+                      onClick={() => copyToClipboard(key.api_key)}
+                      className="text-[10px] text-indigo-300 hover:text-white px-2 py-1 rounded bg-indigo-950 border border-indigo-800/50 transition"
+                    >
+                      {copiedKey === key.api_key ? 'Copied!' : 'Copy'}
+                    </button>
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-6">
@@ -182,37 +198,113 @@ export default function ApiKeysPage() {
         )}
       </div>
 
-      {/* Simplified Developer Integration Guide */}
-      <div className="bg-[#0b0f29]/80 border border-indigo-900/50 rounded-2xl p-6 backdrop-blur-md shadow-xl space-y-5">
-        <div>
-          <h2 className="text-sm font-bold text-white uppercase tracking-wider mb-1">How to Use Your API Keys</h2>
+      {/* Comprehensive Professional Integration Guide */}
+      <div className="bg-[#0b0f29]/80 border border-indigo-900/50 rounded-2xl p-6 md:p-8 backdrop-blur-md shadow-xl space-y-8">
+        <div className="border-b border-indigo-950 pb-4">
+          <h2 className="text-base font-bold text-white uppercase tracking-wider mb-1">
+            Complete WebMCP Integration Guide
+          </h2>
           <p className="text-xs text-indigo-300/70">
-            Connect your AI agents to your website in 3 simple steps.
+            Follow this step-by-step developer guide to connect your website or app to our agent proxy infrastructure.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-          <div className="p-4 rounded-xl bg-indigo-950/30 border border-indigo-900/40 space-y-2">
-            <div className="w-6 h-6 rounded-lg bg-cyan-500/10 text-cyan-400 font-bold flex items-center justify-center border border-cyan-500/30">1</div>
-            <div className="font-bold text-white">Copy Your Key</div>
-            <p className="text-indigo-300/70">
-              Generate and copy an active API key from above to use as your secure access password.
+        <div className="space-y-8 text-xs text-indigo-200">
+          {/* Step 1 */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <span className="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 font-bold flex items-center justify-center border border-cyan-500/40 text-xs">
+                1
+              </span>
+              <h3 className="font-bold text-white text-sm">Generate & Store Your API Key</h3>
+            </div>
+            <p className="text-indigo-300/80 leading-relaxed pl-9">
+              Generate a key above and store it securely in your website&apos;s server-side environment variables. Never expose this key in public client-side JavaScript.
             </p>
+            <div className="pl-9">
+              <div className="text-[11px] font-mono text-indigo-400 mb-1">In your website project (.env.local):</div>
+              <pre className="p-3.5 rounded-xl bg-[#030014] text-cyan-300 font-mono text-[11px] border border-indigo-900/60 overflow-x-auto">
+{`WEBMCP_API_KEY=mcp_live_your_generated_key_here
+WEBMCP_PROXY_URL=https://webmcp-console.vercel.app/api/proxy`}
+              </pre>
+            </div>
           </div>
 
-          <div className="p-4 rounded-xl bg-indigo-950/30 border border-indigo-900/40 space-y-2">
-            <div className="w-6 h-6 rounded-lg bg-cyan-500/10 text-cyan-400 font-bold flex items-center justify-center border border-cyan-500/30">2</div>
-            <div className="font-bold text-white">Connect Your App</div>
-            <p className="text-indigo-300/70">
-              Send requests from your app to our proxy endpoint <code className="text-cyan-300 font-mono">/api/proxy</code> with your key attached in the headers.
+          {/* Step 2 */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <span className="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 font-bold flex items-center justify-center border border-cyan-500/40 text-xs">
+                2
+              </span>
+              <h3 className="font-bold text-white text-sm">Send Requests Through the Proxy Endpoint</h3>
+            </div>
+            <p className="text-indigo-300/80 leading-relaxed pl-9">
+              Route your AI agent queries and tool calls through our high-performance proxy. Pass your key in the <code className="text-cyan-300 font-mono bg-cyan-950/60 px-1.5 py-0.5 rounded">Authorization</code> header as a Bearer token.
             </p>
+            <div className="pl-9 space-y-2">
+              <div className="text-[11px] font-mono text-indigo-400">Node.js / TypeScript Example:</div>
+              <pre className="p-3.5 rounded-xl bg-[#030014] text-cyan-300 font-mono text-[11px] border border-indigo-900/60 overflow-x-auto">
+{`async function sendAgentQuery(prompt: string) {
+  const response = await fetch(process.env.WEBMCP_PROXY_URL!, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': \`Bearer \${process.env.WEBMCP_API_KEY}\`,
+    },
+    body: JSON.stringify({
+      agent_id: 'my-website-agent',
+      prompt: prompt,
+      action: 'process_query',
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(\`WebMCP Proxy Error: \${response.status}\`);
+  }
+
+  const result = await response.json();
+  return result;
+}`}
+              </pre>
+            </div>
           </div>
 
-          <div className="p-4 rounded-xl bg-indigo-950/30 border border-indigo-900/40 space-y-2">
-            <div className="w-6 h-6 rounded-lg bg-cyan-500/10 text-cyan-400 font-bold flex items-center justify-center border border-cyan-500/30">3</div>
-            <div className="font-bold text-white">Track Live Traffic</div>
-            <p className="text-indigo-300/70">
-              Head over to your <strong>Telemetry</strong> tab to view live requests and performance stats instantly.
+          {/* Step 3 */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <span className="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 font-bold flex items-center justify-center border border-cyan-500/40 text-xs">
+                3
+              </span>
+              <h3 className="font-bold text-white text-sm">Verify Payload & Handle Responses</h3>
+            </div>
+            <p className="text-indigo-300/80 leading-relaxed pl-9">
+              The WebMCP proxy validates your API key, runs schema sanitization, and returns structured agent payloads. Ensure your application parses the JSON response appropriately.
+            </p>
+            <div className="pl-9">
+              <div className="text-[11px] font-mono text-indigo-400 mb-1">Expected Standard JSON Response:</div>
+              <pre className="p-3.5 rounded-xl bg-[#030014] text-cyan-300 font-mono text-[11px] border border-indigo-900/60 overflow-x-auto">
+{`{
+  "status": "success",
+  "data": {
+    "agent_id": "my-website-agent",
+    "response": "Agent task executed successfully.",
+    "execution_time_ms": 42
+  }
+}`}
+              </pre>
+            </div>
+          </div>
+
+          {/* Step 4 */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <span className="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 font-bold flex items-center justify-center border border-cyan-500/40 text-xs">
+                4
+              </span>
+              <h3 className="font-bold text-white text-sm">Monitor Live Performance in Telemetry</h3>
+            </div>
+            <p className="text-indigo-300/80 leading-relaxed pl-9">
+              Once requests begin executing through your website, navigate to the <strong>Telemetry</strong> tab in this console to view real-time request rates, latency tracking, and execution logs.
             </p>
           </div>
         </div>
