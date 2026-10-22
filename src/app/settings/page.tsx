@@ -111,7 +111,9 @@ export default function SettingsPage() {
       <div className="border-b border-indigo-950 pb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-extrabold text-white tracking-tight">Account & Enterprise Settings</h1>
-          <p className="text-indigo-200/70 text-sm mt-1">Manage global security policies, billing methods, and node infrastructure.</p>
+          <p className="text-indigo-200/70 text-sm mt-1">
+            Manage global security policies, billing methods, and node infrastructure.
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono bg-cyan-950/80 text-cyan-400 border border-cyan-800/60 shadow-inner">
@@ -123,42 +125,7 @@ export default function SettingsPage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
         {/* Navigation Sidebar */}
         <div className="space-y-1.5 md:col-span-1">
-          <button type="button" onClick={() => setActiveTab('profile')} className={`w-full text-left px-4 py-3 rounded-xl text-xs font-medium transition flex items-center gap-3 ${activeTab === 'profile' ? 'bg-indigo-950 text-cyan-400 border border-indigo-800/60 shadow-lg' : 'text-indigo-300 hover:bg-indigo-950/40 hover:text-white'}`}>
-            <span>👤</span> Profile & Organization
-          </button>
-          <button type="button" onClick={() => setActiveTab('billing')} className={`w-full text-left px-4 py-3 rounded-xl text-xs font-medium transition flex items-center gap-3 ${activeTab === 'billing' ? 'bg-indigo-950 text-cyan-400 border border-indigo-800/60 shadow-lg' : 'text-indigo-300 hover:bg-indigo-950/40 hover:text-white'}`}>
-            <span>💳</span> Billing & Payments
-          </button>
-          <button type="button" onClick={() => setActiveTab('region')} className={`w-full text-left px-4 py-3 rounded-xl text-xs font-medium transition flex items-center gap-3 ${activeTab === 'region' ? 'bg-indigo-950 text-cyan-400 border border-indigo-800/60 shadow-lg' : 'text-indigo-300 hover:bg-indigo-950/40 hover:text-white'}`}>
-            <span>🌍</span> Region & Language
-          </button>
-          <button type="button" onClick={() => setActiveTab('security')} className={`w-full text-left px-4 py-3 rounded-xl text-xs font-medium transition flex items-center gap-3 ${activeTab === 'security' ? 'bg-indigo-950 text-cyan-400 border border-indigo-800/60 shadow-lg' : 'text-indigo-300 hover:bg-indigo-950/40 hover:text-white'}`}>
-            <span>🔒</span> Security & Policies
-          </button>
-        </div>
-
-        {/* Content Area */}
-        <div className="md:col-span-3 space-y-6">
-          {message && (
-            <div className={`p-4 rounded-xl text-xs font-medium ${message.includes('Error') ? 'bg-rose-950/60 text-rose-300 border border-rose-800/50' : 'bg-cyan-950/60 text-cyan-300 border border-cyan-800/50'}`}>
-              {message}
-            </div>
-          )}
-
-          {/* TAB 1: PROFILE */}
-          {activeTab === 'profile' && (
-            <form onSubmit={handleSave} className="bg-[#0b0f29]/90 p-8 rounded-2xl border border-indigo-900/60 shadow-2xl space-y-6">
-              <div>
-                <h2 className="text-lg font-bold text-white">Organization Profile</h2>
-                <p className="text-xs text-indigo-300/70 mt-0.5">Primary business identifiers and administrative contact info.</p>
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-xs font-bold text-indigo-300 uppercase tracking-wider">Account Email</label>
-                <input type="email" value={user?.email || ''} disabled className="w-full bg-[#030014]/80 border border-indigo-950 rounded-xl px-4 py-3 text-xs text-indigo-400 cursor-not-allowed" />
-                <p className="text-[10px] text-indigo-400/60">Managed securely via Supabase Auth credentials.</p>
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-xs font-bold text-indigo-300 uppercase tracking-wider">Organization / Business Legal Name</label>
-                <input type="text" value={businessName} onChange={(e) => setBusiness
+          <button
+            type="button"
+            onClick={() => setActiveTab('profile')}
+            className={`w-full text-left px-4 py-3 rounded-xl text-xs font-medium transition flex items
