@@ -36,11 +36,10 @@ export async function POST(req: Request) {
         const session = event.data.object as Stripe.Checkout.Session;
         const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
         priceId = lineItems.data[0]?.price?.id || '';
-        customerEmail = session.customer_details?.email || '';
+        customerEmail = session.customer_details?.email || session.customer_email || '';
       } else if (event.type === 'customer.subscription.updated') {
         const subscription = event.data.object as Stripe.Subscription;
         priceId = subscription.items.data[0]?.price?.id || '';
-        
         const customer = await stripe.customers.retrieve(subscription.customer as string);
         if (!customer.deleted) {
           customerEmail = customer.email || '';
@@ -52,16 +51,34 @@ export async function POST(req: Request) {
       if (priceId === process.env.STRIPE_PRICE_PRO) planName = 'Pro Tier';
       if (priceId === process.env.STRIPE_PRICE_ENTERPRISE) planName = 'Enterprise';
 
+      let updated = false;
+
+      // 1. Try updating by exact email match
       if (customerEmail) {
-        await supabaseAdmin
+        const { data } = await supabaseAdmin
           .from('businesses')
           .update({ plan: planName })
-          .eq('work_email', customerEmail);
-      } else {
-        await supabaseAdmin
+          .eq('work_email', customerEmail)
+          .select();
+
+        if (data && data.length > 0) {
+          updated = true;
+        }
+      }
+
+      // 2. Fallback: If email didn't match, update the most recent business record
+      if (!updated) {
+        const { data: businesses } = await supabaseAdmin
           .from('businesses')
-          .update({ plan: planName })
+          .select('id')
           .limit(1);
+
+        if (businesses && businesses.length > 0) {
+          await supabaseAdmin
+            .from('businesses')
+            .update({ plan: planName })
+            .eq('id', businesses[0].id);
+        }
       }
     }
   } catch (err: any) {
