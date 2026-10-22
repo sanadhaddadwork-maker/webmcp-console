@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState } from "react";
 
@@ -28,13 +28,13 @@ export default function AnalyticsPage() {
   ];
 
   return (
-    <div className="max-w-6xl mx-auto py-6 space-y-8 relative animate-fade-in">
+    <div className="max-w-6xl mx-auto py-8 px-6 space-y-8">
       
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-indigo-950 pb-5">
         <div>
           <h1 className="text-2xl font-bold text-white tracking-tight">AI Agent Telemetry & Analytics</h1>
-          <p className="text-xs text-indigo-200/70">
+          <p className="text-xs text-indigo-200/70 mt-1">
             Real-time request metrics, proxy response latency, and agent conversion breakdown.
           </p>
         </div>
@@ -60,25 +60,25 @@ export default function AnalyticsPage() {
       {/* SECTION 1: LIVE METRIC CARDS */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         
-        <div className="bg-[#090520] border border-indigo-900/60 rounded-2xl p-5 space-y-2 shadow-xl">
+        <div className="bg-[#090520] border border-indigo-900/60 rounded-2xl p-5 space-y-2 shadow-xl backdrop-blur-md">
           <p className="text-[10px] uppercase font-bold text-indigo-400">Total Agent Requests</p>
           <div className="text-2xl font-black text-white">{metrics.requests}</div>
           <span className="text-[10px] text-emerald-400 font-semibold">↑ 14% vs previous period</span>
         </div>
 
-        <div className="bg-[#090520] border border-indigo-900/60 rounded-2xl p-5 space-y-2 shadow-xl">
+        <div className="bg-[#090520] border border-indigo-900/60 rounded-2xl p-5 space-y-2 shadow-xl backdrop-blur-md">
           <p className="text-[10px] uppercase font-bold text-indigo-400">Avg Edge Latency</p>
           <div className="text-2xl font-black text-cyan-300">{metrics.latency}</div>
           <span className="text-[10px] text-cyan-400 font-semibold">⚡ Cloudflare Worker Edge</span>
         </div>
 
-        <div className="bg-[#090520] border border-indigo-900/60 rounded-2xl p-5 space-y-2 shadow-xl">
+        <div className="bg-[#090520] border border-indigo-900/60 rounded-2xl p-5 space-y-2 shadow-xl backdrop-blur-md">
           <p className="text-[10px] uppercase font-bold text-indigo-400">Schema Success Rate</p>
           <div className="text-2xl font-black text-emerald-400">{metrics.successRate}</div>
           <span className="text-[10px] text-emerald-400 font-semibold">Zero schema parsing drops</span>
         </div>
 
-        <div className="bg-[#090520] border border-indigo-900/60 rounded-2xl p-5 space-y-2 shadow-xl">
+        <div className="bg-[#090520] border border-indigo-900/60 rounded-2xl p-5 space-y-2 shadow-xl backdrop-blur-md">
           <p className="text-[10px] uppercase font-bold text-indigo-400">Unique Active Bots</p>
           <div className="text-2xl font-black text-purple-300">{metrics.activeAgents}</div>
           <span className="text-[10px] text-purple-400 font-semibold">Claude, ChatGPT, Perplexity</span>
@@ -90,7 +90,7 @@ export default function AnalyticsPage() {
       <div className="grid md:grid-cols-3 gap-8">
         
         {/* Agent Traffic Breakdown */}
-        <div className="md:col-span-2 bg-[#090520] border border-indigo-900/60 rounded-2xl p-6 space-y-6 shadow-xl">
+        <div className="md:col-span-2 bg-[#090520] border border-indigo-900/60 rounded-2xl p-6 space-y-6 shadow-xl backdrop-blur-md">
           <div className="flex items-center justify-between border-b border-indigo-950 pb-3">
             <h2 className="text-sm font-bold text-white uppercase tracking-wider">Agent Traffic Distribution</h2>
             <span className="text-[10px] text-indigo-300/60">Filtered by {timeframe.toUpperCase()}</span>
@@ -115,7 +115,7 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Real-Time Health Status */}
-        <div className="bg-[#090520] border border-indigo-900/60 rounded-2xl p-6 space-y-4 shadow-xl flex flex-col justify-between">
+        <div className="bg-[#090520] border border-indigo-900/60 rounded-2xl p-6 space-y-4 shadow-xl backdrop-blur-md flex flex-col justify-between">
           <div className="space-y-3">
             <h2 className="text-sm font-bold text-white uppercase tracking-wider border-b border-indigo-950 pb-3">System Health</h2>
             
@@ -127,7 +127,7 @@ export default function AnalyticsPage() {
 
               <div className="flex items-center justify-between p-2.5 bg-[#030014] rounded-xl border border-indigo-950">
                 <span className="text-indigo-200">Local Routing</span>
-                <span className="text-[10px] font-bold text-cyan-400 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-800/50">Jordan CliQ Active</span>
+                <span className="text-[10px] font-bold text-cyan-400 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-800/50">Edge Active</span>
               </div>
 
               <div className="flex items-center justify-between p-2.5 bg-[#030014] rounded-xl border border-indigo-950">
@@ -138,14 +138,14 @@ export default function AnalyticsPage() {
           </div>
 
           <div className="pt-4 border-t border-indigo-950 text-center">
-            <p className="text-[11px] text-indigo-300/60">Edge Workers deployed in 280+ global locations.</p>
+            <p className="text-[11px] text-indigo-300/60">Edge Workers deployed globally.</p>
           </div>
         </div>
 
       </div>
 
       {/* SECTION 3: RECENT REQUEST LOG STREAM */}
-      <div className="bg-[#090520] border border-indigo-900/60 rounded-2xl p-6 space-y-4 shadow-xl">
+      <div className="bg-[#090520] border border-indigo-900/60 rounded-2xl p-6 space-y-4 shadow-xl backdrop-blur-md">
         <div className="flex items-center justify-between border-b border-indigo-950 pb-3">
           <h2 className="text-sm font-bold text-white uppercase tracking-wider">Live Agent Request Stream</h2>
           <span className="text-[10px] font-mono text-cyan-400 flex items-center space-x-1.5">
