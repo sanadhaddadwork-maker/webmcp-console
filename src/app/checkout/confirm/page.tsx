@@ -1,196 +1,214 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
-import { useState, Suspense } from 'react';
+import { useEffect, useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { createClient } from '@supabase/supabase-js';
+import Link from 'next/link';
 
-const PLAN_DETAILS: Record<string, { 
-  name: string; 
-  price: string; 
-  period: string; 
-  tagline: string;
-  features: { title: string; desc: string }[];
-  specs: { label: string; value: string }[];
-}> = {
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
+const PLAN_DETAILS: Record<string, { name: string; price: string; interval: string; features: string[] }> = {
   starter: {
     name: 'Starter Tier',
     price: '$29',
-    period: '/month',
-    tagline: 'Perfect for growing agents and early production setups.',
-    features: [
-      { title: 'Global Edge Proxy', desc: 'Low-latency routing across worldwide edge nodes.' },
-      { title: 'Up to 100,000 Requests', desc: 'Generous monthly volume for active agent workflows.' },
-      { title: '5 Active API Keys', desc: 'Securely scope keys across different environments.' },
-    ],
-    specs: [
-      { label: 'Network SLA', value: '99.9% Uptime' },
-      { label: 'Support Tier', value: 'Standard Email Support' },
-      { label: 'Rate Limit', value: '50 req/sec burst' },
-    ],
+    interval: '/month',
+    features: ['Up to 5 AI Agents', '10,000 WebMCP Calls/mo', 'Community Support', 'Basic Analytics'],
   },
   pro: {
     name: 'Pro Tier',
     price: '$149',
-    period: '/month',
-    tagline: 'Built for scaling heavy production proxy traffic and multi-agent systems.',
-    features: [
-      { title: 'Priority Regional Edge Routing', desc: 'Optimized routing paths for maximum execution speed.' },
-      { title: 'Up to 500,000 Requests', desc: 'High-capacity throughput with automated scaling.' },
-      { title: 'Unlimited API Keys', desc: 'Granular key management for team collaboration.' },
-    ],
-    specs: [
-      { label: 'Network SLA', value: '99.95% Uptime' },
-      { label: 'Support Tier', value: '24/7 Priority Support' },
-      { label: 'Rate Limit', value: '250 req/sec burst' },
-    ],
+    interval: '/month',
+    features: ['Unlimited AI Agents', '250,000 WebMCP Calls/mo', 'Priority Support', 'Advanced Telemetry & Webhooks', 'Custom Domain Proxy'],
   },
   enterprise: {
     name: 'Enterprise Tier',
-    price: '$499',
-    period: '/month',
-    tagline: 'Custom SLA, dedicated infrastructure, and zero operational limits.',
-    features: [
-      { title: 'Dedicated Cloudflare Workers', isolated: true, desc: 'Isolated worker instances reserved exclusively for your agents.' } as any,
-      { title: 'Unlimited Requests', desc: 'Zero throttling or caps on your production pipelines.' },
-      { title: 'Custom Schema Validation', desc: 'Advanced payload inspection and custom validation rules.' },
-    ],
-    specs: [
-      { label: 'Network SLA', value: '99.99% Guaranteed' },
-      { label: 'Support Tier', value: 'Dedicated Account Manager' },
-      { label: 'Rate Limit', value: 'Unlimited / Custom' },
-    ],
+    price: 'Custom',
+    interval: '',
+    features: ['Unlimited Everything', 'Dedicated Infrastructure', 'SLA & 24/7 Phone Support', 'Custom Integrations', 'SOC2 Compliance'],
   },
 };
 
-function ConfirmContent() {
+function CheckoutConfirmContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const planKey = searchParams.get('plan') || 'pro';
-  const plan = PLAN_DETAILS[planKey] || PLAN_DETAILS.pro;
-  const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const planId = searchParams.get('plan')?.toLowerCase() || '';
 
-  const handleCheckout = async () => {
-    setLoading(true);
-    setErrorMsg(null);
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<any>(null);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+
+  const plan = PLAN_DETAILS[planId];
+
+  useEffect(() => {
+    async function checkAuthAndPlan() {
+      // 1. Guard against invalid plan IDs
+      if (!plan) {
+        router.push('/plans');
+        return;
+      }
+
+      // 2. Guard against unauthenticated users
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        // Redirect to login with return URL
+        router.push(`/login?redirect=/checkout/confirm?plan=${planId}`);
+        return;
+      }
+
+      setUser(session.user);
+      setLoading(false);
+    }
+
+    checkAuthAndPlan();
+  }, [planId, plan, router]);
+
+  const handleProceedToCheckout = async () => {
+    setCheckoutLoading(true);
+    setErrorMsg('');
+
     try {
       const res = await fetch('/api/stripe/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planId: planKey }),
+        body: JSON.stringify({ planId }),
       });
+
       const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        setErrorMsg(data.error || 'Failed to create checkout session');
-        setLoading(false);
+
+      if (!res.ok || !data.url) {
+        throw new Error(data.error || 'Failed to initialize payment session.');
       }
+
+      window.location.href = data.url;
     } catch (err: any) {
-      setErrorMsg(err.message || 'Network error occurred');
-      setLoading(false);
+      setErrorMsg(err.message || 'Something went wrong. Please try again.');
+      setCheckoutLoading(false);
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="flex items-center space-x-3 text-indigo-400">
+          <div className="w-5 h-5 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" />
+          <span className="text-sm font-medium">Verifying session...</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-5xl mx-auto py-12 px-6 text-white bg-transparent">
-      {/* Header Section */}
-      <div className="mb-10 text-center">
-        <span className="text-xs font-semibold tracking-widest text-cyan-400 uppercase">Secure Checkout Pipeline</span>
-        <h1 className="text-4xl font-extrabold mt-2">Review Your Subscription</h1>
-        <p className="text-gray-400 text-sm mt-1">{plan.tagline}</p>
+    <div className="max-w-4xl mx-auto py-12 px-4">
+      {/* Header */}
+      <div className="mb-8">
+        <Link href="/plans" className="text-xs text-indigo-400 hover:text-indigo-300 font-medium flex items-center gap-1 mb-4">
+          ← Back to Plans
+        </Link>
+        <h1 className="text-3xl font-bold text-white tracking-tight">Confirm Your Subscription</h1>
+        <p className="text-indigo-200/70 text-sm mt-1">
+          Review your order details below before proceeding to secure checkout.
+        </p>
       </div>
 
-      {/* Two-Column Professional Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        
-        {/* Left Column: Detailed Features & Specs (Spans 2 columns) */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="border border-indigo-900/50 rounded-2xl p-8 bg-indigo-950/20 backdrop-blur-md">
-            <h2 className="text-lg font-bold text-white mb-4">Included Capabilities</h2>
-            <div className="space-y-4">
-              {plan.features.map((f, i) => (
-                <div key={i} className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded-full bg-cyan-950 border border-cyan-800 flex items-center justify-center text-cyan-400 text-xs font-bold mt-0.5 flex-shrink-0">
-                    ✓
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-semibold text-white">{f.title}</h4>
-                    <p className="text-xs text-gray-400 mt-0.5">{f.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="border-t border-indigo-900/40 mt-8 pt-6">
-              <h3 className="text-sm font-semibold text-gray-300 mb-4">Infrastructure Specifications</h3>
-              <div className="grid grid-cols-3 gap-4">
-                {plan.specs.map((spec, i) => (
-                  <div key={i} className="bg-indigo-950/40 border border-indigo-900/40 rounded-xl p-3">
-                    <span className="text-[10px] text-gray-400 uppercase tracking-wider block">{spec.label}</span>
-                    <strong className="text-xs text-cyan-300 font-semibold mt-1 block">{spec.value}</strong>
-                  </div>
-                ))}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* Main Details Column */}
+        <div className="md:col-span-2 space-y-6">
+          <div className="bg-[#0b0f29]/80 border border-indigo-900/50 rounded-2xl p-6 backdrop-blur-md">
+            <h2 className="text-lg font-semibold text-white mb-4">Account Summary</h2>
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between py-2 border-b border-indigo-950">
+                <span className="text-indigo-300">Subscriber</span>
+                <span className="text-white font-medium">{user?.email}</span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-indigo-950">
+                <span className="text-indigo-300">Selected Plan</span>
+                <span className="text-white font-medium">{plan.name}</span>
+              </div>
+              <div className="flex justify-between py-2">
+                <span className="text-indigo-300">Billing Cycle</span>
+                <span className="text-white font-medium">Monthly (Cancel anytime)</span>
               </div>
             </div>
           </div>
+
+          <div className="bg-[#0b0f29]/80 border border-indigo-900/50 rounded-2xl p-6 backdrop-blur-md">
+            <h2 className="text-lg font-semibold text-white mb-4">Plan Highlights</h2>
+            <ul className="space-y-2.5">
+              {plan.features.map((feature, i) => (
+                <li key={i} className="flex items-center text-sm text-indigo-100">
+                  <svg className="w-4 h-4 text-cyan-400 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+                  </svg>
+                  {feature}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
 
-        {/* Right Column: Pricing & Checkout Action Card */}
-        <div className="border border-indigo-900/50 rounded-2xl p-6 bg-indigo-950/30 backdrop-blur-md relative">
-          <div className="flex justify-between items-center mb-4">
-            <span className="text-xs font-semibold text-gray-400 uppercase">{plan.name}</span>
-            <span className="text-[10px] bg-cyan-950 text-cyan-300 border border-cyan-800/60 px-2 py-0.5 rounded-full font-semibold">
-              RECURRING
-            </span>
+        {/* Payment Summary Sidebar */}
+        <div className="md:col-span-1">
+          <div className="bg-[#0b0f29]/80 border border-indigo-900/50 rounded-2xl p-6 backdrop-blur-md sticky top-24 space-y-6">
+            <h2 className="text-lg font-semibold text-white">Order Summary</h2>
+
+            <div className="space-y-3 text-sm border-b border-indigo-950 pb-4">
+              <div className="flex justify-between text-indigo-200">
+                <span>{plan.name}</span>
+                <span>{plan.price}</span>
+              </div>
+              <div className="flex justify-between text-indigo-400 text-xs">
+                <span>Taxes</span>
+                <span>Calculated at checkout</span>
+              </div>
+            </div>
+
+            <div className="flex justify-between items-baseline text-white">
+              <span className="font-semibold text-base">Total Due Now</span>
+              <div className="text-right">
+                <span className="text-2xl font-bold">{plan.price}</span>
+                <span className="text-xs text-indigo-300">{plan.interval}</span>
+              </div>
+            </div>
+
+            {errorMsg && (
+              <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-xs">
+                {errorMsg}
+              </div>
+            )}
+
+            <button
+              onClick={handleProceedToCheckout}
+              disabled={checkoutLoading}
+              className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 text-white font-bold text-sm shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center space-x-2 disabled:opacity-50"
+            >
+              {checkoutLoading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Redirecting...</span>
+                </>
+              ) : (
+                <span>Proceed to Checkout →</span>
+              )}
+            </button>
+
+            <p className="text-[11px] text-indigo-300/60 text-center leading-relaxed">
+              Encrypted 256-bit SSL transaction via Stripe Checkout.
+            </p>
           </div>
-
-          <div className="flex items-baseline gap-1 mb-6 pb-6 border-b border-indigo-900/40">
-            <span className="text-5xl font-extrabold">{plan.price}</span>
-            <span className="text-gray-400 text-sm">{plan.period}</span>
-          </div>
-
-          <div className="space-y-3 text-xs text-gray-300 mb-6">
-            <div className="flex justify-between">
-              <span>Billing Cycle</span>
-              <span className="text-white font-medium">Monthly (Cancel Anytime)</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Setup Fees</span>
-              <span className="text-cyan-400 font-medium">$0.00</span>
-            </div>
-            <div className="flex justify-between border-t border-indigo-900/40 pt-3 text-sm font-bold text-white">
-              <span>Total Due Today</span>
-              <span>{plan.price}</span>
-            </div>
-          </div>
-
-          {errorMsg && (
-            <div className="mb-4 p-3 bg-red-950/60 border border-red-800 rounded-xl text-xs text-red-300">
-              {errorMsg}
-            </div>
-          )}
-
-          <button
-            onClick={handleCheckout}
-            disabled={loading}
-            className="w-full py-3.5 rounded-xl font-semibold text-black bg-white hover:bg-gray-200 transition-all shadow-xl disabled:opacity-50 text-sm"
-          >
-            {loading ? 'Connecting to Stripe...' : 'Proceed to Secure Checkout'}
-          </button>
-
-          <p className="text-[10px] text-center text-gray-400 mt-4">
-            🔒 Encrypted 256-bit SSL session powered by Stripe.
-          </p>
         </div>
-
       </div>
     </div>
   );
 }
 
-export default function ConfirmPlanPage() {
+export default function CheckoutConfirmPage() {
   return (
-    <Suspense fallback={<div className="text-center py-20 text-white">Loading confirmation details...</div>}>
-      <ConfirmContent />
+    <Suspense fallback={<div className="min-h-[60vh] flex items-center justify-center text-indigo-400">Loading checkout preview...</div>}>
+      <CheckoutConfirmContent />
     </Suspense>
   );
 }
