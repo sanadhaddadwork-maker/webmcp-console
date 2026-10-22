@@ -2,46 +2,54 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@supabase/supabase-js';
-import Link from 'next/link';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { createClient } from '@/lib/supabaseBrowser';
 
 export default function PlansPage() {
   const router = useRouter();
+  const supabase = createClient();
   const [user, setUser] = useState<any>(null);
   const [business, setBusiness] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadUserData() {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session?.user) {
-        setUser(session.user);
-        
-        // Fetch the user's business record from Supabase
-        const { data: bizData } = await supabase
-          .from('businesses')
-          .select('*')
-          .eq('work_email', session.user.email)
-          .single();
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          setUser(user);
+          
+          // Fetch business record
+          const { data: bizData } = await supabase
+            .from('businesses')
+            .select('*')
+            .eq('work_email', user.email)
+            .maybeSingle();
 
-        if (bizData) {
-          setBusiness(bizData);
+          if (bizData) {
+            setBusiness(bizData);
+          } else {
+            setBusiness({ plan: 'Free Tier', business_name: 'My Account', work_email: user.email });
+          }
         } else {
-          // Fallback if record doesn't exist yet: default to Free Tier
-          setBusiness({ plan: 'Free Tier', business_name: 'My Account', work_email: session.user.email });
+          // Check mock user fallback
+          const mockUser = localStorage.getItem("mock_user");
+          if (mockUser) {
+            const parsed = JSON.parse(mockUser);
+            setUser(parsed);
+            const savedPlan = localStorage.getItem("active_plan");
+            const planName = savedPlan ? JSON.parse(savedPlan).name : 'Free Tier';
+            setBusiness({ plan: planName, business_name: 'My Account', work_email: parsed.email });
+          }
         }
+      } catch (err) {
+        console.error('Error loading user on plans page:', err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
 
     loadUserData();
-  }, []);
+  }, [supabase]);
 
   const handleSelectPlan = (planId: string) => {
     if (!user) {
@@ -49,7 +57,6 @@ export default function PlansPage() {
       return;
     }
     if (planId === 'free') {
-      // Free tier doesn't require Stripe checkout
       return;
     }
     router.push(`/checkout/confirm?plan=${planId}`);
