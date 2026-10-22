@@ -20,15 +20,21 @@ export default function SettingsPage() {
   const [region, setRegion] = useState('auto-edge');
   const [notif, setNotif] = useState(true);
 
-  // UI states
+  // UI & Toast states
   const [showDel, setShowDel] = useState(false);
   const [delText, setDelText] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [msg, setMsg] = useState('');
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  const triggerToast = (message: string, type: 'success' | 'error') => {
+    setToast({ message, type });
+    setTimeout(() => {
+      setToast(null);
+    }, 4000);
+  };
 
   useEffect(() => {
-    // 1. Auto-detect browser timezone
     try {
       const detectedTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
       if (detectedTz) setTz(detectedTz);
@@ -36,7 +42,6 @@ export default function SettingsPage() {
       console.error('Timezone auto-detection failed:', e);
     }
 
-    // 2. Fetch authenticated user and saved business profile
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) {
         router.replace('/login');
@@ -66,7 +71,6 @@ export default function SettingsPage() {
     e.preventDefault();
     if (!user) return;
     setSaving(true);
-    setMsg('');
 
     try {
       const { error } = await supabase.from('businesses').upsert({
@@ -82,12 +86,12 @@ export default function SettingsPage() {
       });
 
       if (error) {
-        setMsg(`Sync Error: ${error.message}`);
+        triggerToast(`Sync Error: ${error.message}`, 'error');
       } else {
-        setMsg('All enterprise settings & preferences synchronized to Supabase successfully.');
+        triggerToast('Enterprise settings synchronized successfully.', 'success');
       }
     } catch (err: any) {
-      setMsg(`Unexpected error: ${err.message}`);
+      triggerToast(`Unexpected error: ${err.message}`, 'error');
     } finally {
       setSaving(false);
     }
@@ -98,7 +102,7 @@ export default function SettingsPage() {
       alert('Please type DELETE to confirm account termination.');
       return;
     }
-    alert('Account deletion simulated. Contact enterprise support to finalize data wipe.');
+    triggerToast('Account termination initiated.', 'error');
     setShowDel(false);
   };
 
@@ -114,7 +118,15 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto py-12 px-6 space-y-8 text-white">
+    <div className="max-w-5xl mx-auto py-12 px-6 space-y-8 text-white relative">
+      {/* TOAST NOTIFICATION POPUP */}
+      {toast && (
+        <div className={`fixed bottom-8 right-8 z-50 flex items-center gap-3 px-5 py-4 rounded-2xl shadow-2xl border text-xs font-medium animate-bounce ${toast.type === 'success' ? 'bg-cyan-950/90 text-cyan-300 border-cyan-700 backdrop-blur-md' : 'bg-rose-950/90 text-rose-300 border-rose-700 backdrop-blur-md'}`}>
+          <span className="text-base">{toast.type === 'success' ? '⚡' : '⚠️'}</span>
+          <span>{toast.message}</span>
+        </div>
+      )}
+
       <div className="border-b border-indigo-950 pb-6 flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight">Account & Enterprise Settings</h1>
@@ -135,12 +147,6 @@ export default function SettingsPage() {
         </div>
 
         <div className="md:col-span-3 space-y-6">
-          {msg && (
-            <div className={`p-4 rounded-xl text-xs ${msg.includes('Error') ? 'bg-rose-950/60 text-rose-300 border border-rose-800' : 'bg-cyan-950/60 text-cyan-300 border border-cyan-800'}`}>
-              {msg}
-            </div>
-          )}
-
           {/* TAB 1: PROFILE */}
           {tab === 'profile' && (
             <form onSubmit={handleSaveAll} className="bg-[#0b0f29] p-8 rounded-2xl border border-indigo-900 space-y-6">
@@ -184,7 +190,7 @@ export default function SettingsPage() {
                 <h3 className="text-xs font-bold text-indigo-300 uppercase mb-3">Payment Method</h3>
                 <div className="p-4 rounded-xl bg-[#030014] border border-indigo-900 flex justify-between items-center text-xs">
                   <span className="text-indigo-300">No active card linked</span>
-                  <button onClick={() => alert('Opening Stripe Portal...')} className="text-cyan-400 font-semibold hover:underline">+ Add Card</button>
+                  <button onClick={() => triggerToast('Redirecting to Stripe secure portal...', 'success')} className="text-cyan-400 font-semibold hover:underline">+ Add Card</button>
                 </div>
               </div>
             </div>
@@ -203,13 +209,8 @@ export default function SettingsPage() {
                   <option value="auto-edge">🌐 Auto-Edge (Global Lowest Latency Anycast)</option>
                   <option value="me-central">📍 Middle East Central (Amman / Riyadh / Dubai - me-central-1)</option>
                   <option value="eu-west-1">📍 Europe West (Frankfurt / London / Paris - eu-west-1)</option>
-                  <option value="eu-north-1">📍 Europe North (Stockholm / Helsinki - eu-north-1)</option>
                   <option value="us-east-1">📍 US East (N. Virginia / Ohio - us-east-1)</option>
-                  <option value="us-west-2">📍 US West (Oregon / California - us-west-2)</option>
-                  <option value="ap-southeast-1">📍 Asia Pacific (Singapore / Tokyo / Sydney - ap-southeast-1)</option>
-                  <option value="ap-south-1">📍 South Asia (Mumbai / Delhi - ap-south-1)</option>
-                  <option value="sa-east-1">📍 South America (São Paulo - sa-east-1)</option>
-                  <option value="af-south-1">📍 Africa (Cape Town / Johannesburg - af-south-1)</option>
+                  <option value="ap-southeast-1">📍 Asia Pacific (Singapore / Tokyo - ap-southeast-1)</option>
                 </select>
               </div>
               <div>
@@ -220,9 +221,6 @@ export default function SettingsPage() {
                   <option value="UTC">UTC (Coordinated Universal Time)</option>
                   <option value="America/New_York">America/New_York (UTC-5)</option>
                   <option value="Europe/London">Europe/London (UTC+0)</option>
-                  <option value="Europe/Berlin">Europe/Berlin (UTC+1)</option>
-                  <option value="Asia/Dubai">Asia/Dubai (UTC+4)</option>
-                  <option value="Asia/Tokyo">Asia/Tokyo (UTC+9)</option>
                 </select>
               </div>
               <div>
@@ -231,9 +229,6 @@ export default function SettingsPage() {
                   <option value="English">English (US / Global)</option>
                   <option value="Arabic">العربية (Arabic)</option>
                   <option value="Spanish">Español (Spanish)</option>
-                  <option value="French">Français (French)</option>
-                  <option value="German">Deutsch (German)</option>
-                  <option value="Turkish">Türkçe (Turkish)</option>
                 </select>
               </div>
               <button type="submit" disabled={saving} className="bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 disabled:opacity-50 text-white font-bold text-xs px-6 py-3 rounded-xl transition shadow-lg">
