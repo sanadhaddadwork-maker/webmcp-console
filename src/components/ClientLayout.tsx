@@ -73,8 +73,8 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
           <nav className="hidden md:flex items-center gap-6 text-xs font-medium text-indigo-200">
             <Link href="/" className={`hover:text-cyan-400 transition ${pathname === '/' ? 'text-cyan-400 font-bold' : ''}`}>Home</Link>
             <Link href="/plans" className={`hover:text-cyan-400 transition ${pathname === '/plans' ? 'text-cyan-400 font-bold' : ''}`}>Plans & Pricing</Link>
-            <Link href="/api-keys" className={`hover:text-cyan-400 transition ${pathname === '/api-keys' ? 'text-cyan-400 font-bold' : ''}`}>API Keys</Link>
-            <Link href="/telemetry" className={`hover:text-cyan-400 transition ${pathname === '/telemetry' ? 'text-cyan-400 font-bold' : ''}`}>Telemetry</Link>
+            <Link href="/keys" className={`hover:text-cyan-400 transition ${pathname === '/keys' ? 'text-cyan-400 font-bold' : ''}`}>API Keys</Link>
+            <Link href="/analytics" className={`hover:text-cyan-400 transition ${pathname === '/analytics' ? 'text-cyan-400 font-bold' : ''}`}>Telemetry</Link>
           </nav>
 
           <div className="flex items-center gap-4">
@@ -108,13 +108,13 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                       <Link href="/" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-white transition">
                         🏠 <span>Home</span>
                       </Link>
-                      <Link href="/telemetry" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-white transition">
+                      <Link href="/analytics" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-white transition">
                         📊 <span>Telemetry & Analytics</span>
                       </Link>
                       <Link href="/plans" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-white transition">
                         ⚡ <span>Plans & Pricing</span>
                       </Link>
-                      <Link href="/api-keys" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-white transition">
+                      <Link href="/keys" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-white transition">
                         🔑 <span>API Keys & Proxies</span>
                       </Link>
                       <Link href="/settings" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-cyan-400 transition font-medium">
