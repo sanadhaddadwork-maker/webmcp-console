@@ -22,12 +22,12 @@ export default function ApiKeysPage() {
   useEffect(() => {
     let isMounted = true;
 
-    async function fetchKeys() {
+    async function checkAuthAndFetchKeys() {
       try {
         const { data: { user } } = await supabase.auth.getUser();
 
         if (!user) {
-          if (isMounted) router.push('/login?redirect=/api-keys');
+          if (isMounted) router.replace('/login?redirect=/api-keys');
           return;
         }
 
@@ -48,7 +48,7 @@ export default function ApiKeysPage() {
       }
     }
 
-    fetchKeys();
+    checkAuthAndFetchKeys();
 
     return () => {
       isMounted = false;
@@ -65,7 +65,7 @@ export default function ApiKeysPage() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        router.push('/login?redirect=/api-keys');
+        router.replace('/login?redirect=/api-keys');
         return;
       }
 
@@ -104,6 +104,18 @@ export default function ApiKeysPage() {
     }
   }
 
+  // Prevent UI flash by returning loading screen until auth check finishes
+  if (loading) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="flex items-center gap-3 text-indigo-300 text-xs font-mono">
+          <div className="w-4 h-4 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+          <span>Authenticating session...</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-4xl mx-auto py-12 px-6 space-y-8">
       {/* Header */}
@@ -139,9 +151,7 @@ export default function ApiKeysPage() {
           Your Active Keys
         </div>
 
-        {loading ? (
-          <div className="p-8 text-center text-xs text-indigo-400 animate-pulse">Loading active keys...</div>
-        ) : keys.length === 0 ? (
+        {keys.length === 0 ? (
           <div className="p-8 text-center text-xs text-indigo-400/70">
             No API keys found. Generate one above to get started!
           </div>
