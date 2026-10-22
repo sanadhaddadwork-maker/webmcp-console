@@ -11,7 +11,6 @@ export default function SettingsPage() {
   const [user, setUser] = useState<any>(null);
   const [tab, setTab] = useState<'profile' | 'billing' | 'region' | 'security' | 'terms'>('profile');
   
-  // Profile & Preferences states
   const [fullName, setFullName] = useState('');
   const [username, setUsername] = useState('');
   const [bizName, setBizName] = useState('');
@@ -20,7 +19,6 @@ export default function SettingsPage() {
   const [region, setRegion] = useState('auto-edge');
   const [notif, setNotif] = useState(true);
 
-  // UI & Toast states
   const [showDel, setShowDel] = useState(false);
   const [delText, setDelText] = useState('');
   const [loading, setLoading] = useState(true);
@@ -29,9 +27,7 @@ export default function SettingsPage() {
 
   const triggerToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type });
-    setTimeout(() => {
-      setToast(null);
-    }, 4000);
+    setTimeout(() => setToast(null), 4000);
   };
 
   useEffect(() => {
@@ -97,15 +93,6 @@ export default function SettingsPage() {
     }
   };
 
-  const handleDeleteAccount = async () => {
-    if (delText !== 'DELETE') {
-      alert('Please type DELETE to confirm account termination.');
-      return;
-    }
-    triggerToast('Account termination initiated.', 'error');
-    setShowDel(false);
-  };
-
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
@@ -119,7 +106,6 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-5xl mx-auto py-12 px-6 space-y-8 text-white relative">
-      {/* TOAST NOTIFICATION POPUP */}
       {toast && (
         <div className={`fixed bottom-8 right-8 z-50 flex items-center gap-3 px-5 py-4 rounded-2xl shadow-2xl border text-xs font-medium animate-bounce ${toast.type === 'success' ? 'bg-cyan-950/90 text-cyan-300 border-cyan-700 backdrop-blur-md' : 'bg-rose-950/90 text-rose-300 border-rose-700 backdrop-blur-md'}`}>
           <span className="text-base">{toast.type === 'success' ? '⚡' : '⚠️'}</span>
@@ -147,7 +133,6 @@ export default function SettingsPage() {
         </div>
 
         <div className="md:col-span-3 space-y-6">
-          {/* TAB 1: PROFILE */}
           {tab === 'profile' && (
             <form onSubmit={handleSaveAll} className="bg-[#0b0f29] p-8 rounded-2xl border border-indigo-900 space-y-6">
               <h2 className="text-lg font-bold">Profile & Identity</h2>
@@ -175,7 +160,6 @@ export default function SettingsPage() {
             </form>
           )}
 
-          {/* TAB 2: BILLING */}
           {tab === 'billing' && (
             <div className="bg-[#0b0f29] p-8 rounded-2xl border border-indigo-900 space-y-6">
               <h2 className="text-lg font-bold">Billing & Plans</h2>
@@ -186,17 +170,9 @@ export default function SettingsPage() {
                 </div>
                 <button onClick={() => router.push('/plans')} className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition">Upgrade ⚡</button>
               </div>
-              <div>
-                <h3 className="text-xs font-bold text-indigo-300 uppercase mb-3">Payment Method</h3>
-                <div className="p-4 rounded-xl bg-[#030014] border border-indigo-900 flex justify-between items-center text-xs">
-                  <span className="text-indigo-300">No active card linked</span>
-                  <button onClick={() => triggerToast('Redirecting to Stripe secure portal...', 'success')} className="text-cyan-400 font-semibold hover:underline">+ Add Card</button>
-                </div>
-              </div>
             </div>
           )}
 
-          {/* TAB 3: REGION */}
           {tab === 'region' && (
             <form onSubmit={handleSaveAll} className="bg-[#0b0f29] p-8 rounded-2xl border border-indigo-900 space-y-6">
               <div className="flex justify-between items-center">
@@ -208,9 +184,8 @@ export default function SettingsPage() {
                 <select value={region} onChange={(e) => setRegion(e.target.value)} className="w-full bg-[#030014] border border-indigo-800 rounded-xl px-4 py-3 text-xs text-white">
                   <option value="auto-edge">🌐 Auto-Edge (Global Lowest Latency Anycast)</option>
                   <option value="me-central">📍 Middle East Central (Amman / Riyadh / Dubai - me-central-1)</option>
-                  <option value="eu-west-1">📍 Europe West (Frankfurt / London / Paris - eu-west-1)</option>
-                  <option value="us-east-1">📍 US East (N. Virginia / Ohio - us-east-1)</option>
-                  <option value="ap-southeast-1">📍 Asia Pacific (Singapore / Tokyo - ap-southeast-1)</option>
+                  <option value="eu-west-1">📍 Europe West (Frankfurt / London - eu-west-1)</option>
+                  <option value="us-east-1">📍 US East (N. Virginia - us-east-1)</option>
                 </select>
               </div>
               <div>
@@ -218,9 +193,8 @@ export default function SettingsPage() {
                 <select value={tz} onChange={(e) => setTz(e.target.value)} className="w-full bg-[#030014] border border-indigo-800 rounded-xl px-4 py-3 text-xs text-white">
                   <option value={tz}>{tz} (Detected Browser Timezone)</option>
                   <option value="Asia/Amman">Asia/Amman (UTC+3)</option>
-                  <option value="UTC">UTC (Coordinated Universal Time)</option>
+                  <option value="UTC">UTC (Universal Time)</option>
                   <option value="America/New_York">America/New_York (UTC-5)</option>
-                  <option value="Europe/London">Europe/London (UTC+0)</option>
                 </select>
               </div>
               <div>
@@ -228,70 +202,36 @@ export default function SettingsPage() {
                 <select value={lang} onChange={(e) => setLang(e.target.value)} className="w-full bg-[#030014] border border-indigo-800 rounded-xl px-4 py-3 text-xs text-white">
                   <option value="English">English (US / Global)</option>
                   <option value="Arabic">العربية (Arabic)</option>
-                  <option value="Spanish">Español (Spanish)</option>
                 </select>
               </div>
-              <button type="submit" disabled={saving} className="bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 disabled:opacity-50 text-white font-bold text-xs px-6 py-3 rounded-xl transition shadow-lg">
+              <button type="submit" disabled={saving} className="bg-gradient-to-r from-indigo-600 to-cyan-500 text-white font-bold text-xs px-6 py-3 rounded-xl transition">
                 {saving ? 'Synchronizing...' : 'Save Regional Preferences'}
               </button>
             </form>
           )}
 
-          {/* TAB 4: SECURITY */}
           {tab === 'security' && (
-            <div className="space-y-6">
-              <div className="bg-[#0b0f29] p-8 rounded-2xl border border-indigo-900 space-y-6">
-                <h2 className="text-lg font-bold">Security & Notifications</h2>
-                <div className="flex justify-between items-center p-4 rounded-xl bg-[#030014] border border-indigo-900">
-                  <div>
-                    <p className="text-xs font-bold">Email & SMS Security Alerts</p>
-                    <p className="text-[11px] text-indigo-300">Instant notifications for new logins & events.</p>
-                  </div>
-                  <input type="checkbox" checked={notif} onChange={(e) => setNotif(e.target.checked)} className="w-4 h-4 accent-cyan-400 cursor-pointer" />
+            <div className="bg-[#0b0f29] p-8 rounded-2xl border border-indigo-900 space-y-6">
+              <h2 className="text-lg font-bold">Security & Notifications</h2>
+              <div className="flex justify-between items-center p-4 rounded-xl bg-[#030014] border border-indigo-900">
+                <div>
+                  <p className="text-xs font-bold">Email & SMS Security Alerts</p>
+                  <p className="text-[11px] text-indigo-300">Instant notifications for new logins & events.</p>
                 </div>
-              </div>
-              <div className="bg-rose-950/20 p-8 rounded-2xl border border-rose-900/40 space-y-4">
-                <h2 className="text-lg font-bold text-rose-400">Danger Zone</h2>
-                <div className="flex justify-between items-center p-4 rounded-xl bg-[#030014] border border-rose-900/50">
-                  <div>
-                    <p className="text-xs font-bold">Delete Account & Data</p>
-                    <p className="text-[11px] text-rose-300">Irreversible erasure of all logs and keys.</p>
-                  </div>
-                  <button onClick={() => setShowDel(true)} className="bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition">Delete Account</button>
-                </div>
+                <input type="checkbox" checked={notif} onChange={(e) => setNotif(e.target.checked)} className="w-4 h-4 accent-cyan-400 cursor-pointer" />
               </div>
             </div>
           )}
 
-          {/* TAB 5: TERMS */}
           {tab === 'terms' && (
             <div className="bg-[#0b0f29] p-8 rounded-2xl border border-indigo-900 space-y-4 text-xs text-indigo-200">
               <h2 className="text-lg font-bold text-white">Terms of Service & Policy</h2>
-              <p><strong>1. Acceptable Use:</strong> Services must be used solely for authorized proxy telemetry and agent interactions. Abuse or automated attack traffic results in immediate termination.</p>
-              <p><strong>2. Data Compliance:</strong> Telemetry metadata is stored in encrypted tables protected by Row Level Security (RLS) under GDPR and SOC-2 guidelines.</p>
-              <p><strong>3. Uptime SLA:</strong> Global edge nodes guarantee 99.99% uptime with automated region failover.</p>
+              <p><strong>1. Acceptable Use:</strong> Services must be used solely for authorized proxy telemetry and agent interactions.</p>
+              <p><strong>2. Data Compliance:</strong> Telemetry metadata is stored under encrypted Row Level Security (RLS) guidelines.</p>
             </div>
           )}
         </div>
       </div>
-
-      {/* DELETE MODAL */}
-      {showDel && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="bg-[#0b0f29] border border-rose-900 rounded-2xl max-w-md w-full p-6 space-y-4">
-            <h3 className="text-lg font-bold text-white">⚠️ Are you sure?</h3>
-            <p className="text-xs text-indigo-200">This action is <strong className="text-rose-400">irreversible</strong>. All data will be erased.</p>
-            <div>
-              <label className="block text-[11px] font-mono text-indigo-300 uppercase mb-2">Type <strong>DELETE</strong> to confirm:</label>
-              <input type="text" value={delText} onChange={(e) => setDelText(e.target.value)} placeholder="DELETE" className="w-full bg-[#030014] border border-rose-900 rounded-xl px-4 py-2.5 text-xs text-white" />
-            </div>
-            <div className="flex justify-end gap-3 pt-2">
-              <button onClick={() => { setShowDel(false); setDelText(''); }} className="px-4 py-2 text-xs text-indigo-300">Cancel</button>
-              <button onClick={handleDeleteAccount} className="bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition">Permanently Erase</button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
