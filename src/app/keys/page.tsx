@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabaseBrowser';
 
 interface ApiKey {
@@ -15,6 +16,7 @@ export default function ApiKeysPage() {
   const [labelInput, setLabelInput] = useState('');
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const router = useRouter();
   const supabase = createClient();
 
   useEffect(() => {
@@ -22,11 +24,19 @@ export default function ApiKeysPage() {
 
     async function fetchKeys() {
       try {
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) {
+          if (isMounted) router.push('/login?redirect=/api-keys');
+          return;
+        }
+
         const { data, error } = await supabase
           .from('api_keys')
           .select('*')
+          .eq('user_id', user.id)
           .order('created_at', { ascending: false })
-          .limit(50); // Prevent heavy rendering loads
+          .limit(50);
 
         if (!error && data && isMounted) {
           setKeys(data);
@@ -43,7 +53,7 @@ export default function ApiKeysPage() {
     return () => {
       isMounted = false;
     };
-  }, [supabase]);
+  }, [supabase, router]);
 
   async function generateKey(e: React.FormEvent) {
     e.preventDefault();
@@ -53,9 +63,19 @@ export default function ApiKeysPage() {
     const generatedKey = `mcp_live_${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`;
 
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.push('/login?redirect=/api-keys');
+        return;
+      }
+
       const { data, error } = await supabase
         .from('api_keys')
-        .insert([{ key_label: labelInput.trim(), api_key: generatedKey }])
+        .insert([{ 
+          user_id: user.id, 
+          key_label: labelInput.trim(), 
+          api_key: generatedKey 
+        }])
         .select();
 
       if (!error && data) {
