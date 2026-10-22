@@ -9,7 +9,6 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   const [user, setUser] = useState<any>(null);
   const [activePlan, setActivePlan] = useState<string>("Free Tier");
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const router = useRouter();
@@ -49,17 +48,11 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       }
     };
 
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePos({ x: e.clientX, y: e.clientY });
-    };
-
     document.addEventListener("mousedown", handleClickOutside);
-    window.addEventListener("mousemove", handleMouseMove);
 
     return () => {
       window.removeEventListener("plan_updated", handlePlanUpdate);
       document.removeEventListener("mousedown", handleClickOutside);
-      window.removeEventListener("mousemove", handleMouseMove);
     };
   }, []);
 
@@ -88,16 +81,8 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
   return (
     <>
-      {/* Reactive Interactive Mouse Aura */}
-      <div
-        className="pointer-events-none fixed inset-0 z-0 transition-opacity duration-300"
-        style={{
-          background: `radial-gradient(600px circle at ${mousePos.x}px ${mousePos.y}px, rgba(99, 102, 241, 0.15), transparent 80%)`,
-        }}
-      />
-
       {/* Top Navigation */}
-      <header className="border-b border-indigo-950/80 bg-[#030014]/80 backdrop-blur-md sticky top-0 z-50">
+      <header className="border-b border-indigo-950/80 bg-[#030014]/90 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between relative z-10">
           {/* Logo & Brand */}
           <div className="flex items-center space-x-8">
@@ -160,7 +145,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
                 {/* Dropdown Menu */}
                 {dropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-64 bg-[#090520] border border-indigo-900/80 rounded-2xl shadow-2xl py-2 z-50 animate-fade-in divide-y divide-indigo-950">
+                  <div className="absolute right-0 mt-2 w-64 bg-[#090520] border border-indigo-900/80 rounded-2xl shadow-2xl py-2 z-50 divide-y divide-indigo-950">
                     <div className="px-4 py-3 space-y-1">
                       <p className="text-[10px] uppercase font-bold text-indigo-400">
                         Signed in as
