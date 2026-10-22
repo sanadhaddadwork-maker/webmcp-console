@@ -6,18 +6,21 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabaseBrowser";
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [user, setUser] = useState<any>(null);
   const [activePlan, setActivePlan] = useState<string>("Free Tier");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const dropdownRef = useRef<HTMLDivElement>(null);
-  
+
   const router = useRouter();
   const supabase = createClient();
 
   useEffect(() => {
-    // 1. Fetch User Auth or Mock
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) {
         setUser(user);
@@ -30,10 +33,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       if (mockUser) setUser(JSON.parse(mockUser));
     });
 
-    // 2. Sync Active Plan directly from Supabase DB on load
     fetchLatestPlan();
 
-    // 3. Instant event listener for plan changes
     const handlePlanUpdate = (e: any) => {
       if (e.detail?.plan) {
         setActivePlan(e.detail.plan);
@@ -45,7 +46,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     window.addEventListener("plan_updated", handlePlanUpdate);
 
     const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
         setDropdownOpen(false);
       }
     };
@@ -56,7 +60,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
     document.addEventListener("mousedown", handleClickOutside);
     window.addEventListener("mousemove", handleMouseMove);
-    
+
     return () => {
       window.removeEventListener("plan_updated", handlePlanUpdate);
       document.removeEventListener("mousedown", handleClickOutside);
@@ -90,7 +94,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className="text-white min-h-screen font-sans antialiased selection:bg-indigo-500 selection:text-white relative bg-[#030014] bg-[linear-gradient(to_right,#1f293715_1px,transparent_1px),linear-gradient(to_bottom,#1f293715_1px,transparent_1px)] bg-[size:4rem_4rem]">
-        
         {/* Reactive Interactive Mouse Aura */}
         <div
           className="pointer-events-none fixed inset-0 z-0 transition-opacity duration-300"
@@ -102,7 +105,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Top Navigation */}
         <header className="border-b border-indigo-950/80 bg-[#030014]/80 backdrop-blur-md sticky top-0 z-50">
           <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between relative z-10">
-            
             {/* Logo & Brand */}
             <div className="flex items-center space-x-8">
               <Link href="/" className="flex items-center space-x-3 group">
@@ -112,7 +114,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <span className="font-bold tracking-tight text-white text-sm">WebMCP</span>
+                  <span className="font-bold tracking-tight text-white text-sm">
+                    WebMCP
+                  </span>
                   <span className="text-[10px] font-mono bg-indigo-950 text-indigo-300 px-2 py-0.5 rounded border border-indigo-800/50 uppercase">
                     Console
                   </span>
@@ -121,10 +125,30 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
               {/* Navigation Links */}
               <nav className="hidden md:flex items-center space-x-7 text-[13px] font-bold text-indigo-100">
-                <Link href="/" className="hover:text-cyan-400 transition-colors">Home</Link>
-                <Link href="/plans" className="hover:text-cyan-400 transition-colors">Plans &amp; Pricing</Link>
-                <Link href="/keys" className="hover:text-cyan-400 transition-colors">API Keys</Link>
-                <Link href="/analytics" className="hover:text-cyan-400 transition-colors">Telemetry</Link>
+                <Link
+                  href="/"
+                  className="hover:text-cyan-400 transition-colors"
+                >
+                  Home
+                </Link>
+                <Link
+                  href="/plans"
+                  className="hover:text-cyan-400 transition-colors"
+                >
+                  Plans &amp; Pricing
+                </Link>
+                <Link
+                  href="/keys"
+                  className="hover:text-cyan-400 transition-colors"
+                >
+                  API Keys
+                </Link>
+                <Link
+                  href="/analytics"
+                  className="hover:text-cyan-400 transition-colors"
+                >
+                  Telemetry
+                </Link>
               </nav>
             </div>
 
@@ -156,8 +180,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   {dropdownOpen && (
                     <div className="absolute right-0 mt-2 w-64 bg-[#090520] border border-indigo-900/80 rounded-2xl shadow-2xl py-2 z-50 animate-fade-in divide-y divide-indigo-950">
                       <div className="px-4 py-3 space-y-1">
-                        <p className="text-[10px] uppercase font-bold text-indigo-400">Signed in as</p>
-                        <p className="text-xs font-semibold text-white truncate">{user.email}</p>
+                        <p className="text-[10px] uppercase font-bold text-indigo-400">
+                          Signed in as
+                        </p>
+                        <p className="text-xs font-semibold text-white truncate">
+                          {user.email}
+                        </p>
                         <div className="pt-1">
                           <span className="inline-flex items-center space-x-1.5 text-[10px] font-bold text-cyan-300 bg-cyan-950/50 px-2.5 py-1 rounded-full border border-cyan-800/40">
                             <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
@@ -207,4 +235,39 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                       <div className="py-1">
                         <button
                           onClick={handleLogout}
-                          className="w-full text-left px-4 py-2 text-xs text-rose-400 hover
+                          className="w-full text-left px-4 py-2 text-xs text-rose-400 hover:bg-rose-500/10 transition-colors font-medium flex items-center space-x-2"
+                        >
+                          <span>Log Out</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-center space-x-3">
+                  <Link
+                    href="/login"
+                    className="text-xs text-indigo-200 hover:text-white px-4 py-2 font-medium transition-colors"
+                  >
+                    Log In
+                  </Link>
+                  <Link
+                    href="/signup"
+                    className="text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-xl transition-all shadow-lg shadow-indigo-600/30"
+                  >
+                    Sign Up
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        </header>
+
+        {/* Main Content Container */}
+        <main className="max-w-7xl mx-auto px-6 py-8 relative z-10">
+          {children}
+        </main>
+      </body>
+    </html>
+  );
+}
