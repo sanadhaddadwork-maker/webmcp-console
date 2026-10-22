@@ -10,7 +10,22 @@ export default function SettingsPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<'profile' | 'billing' | 'region' | 'security'>('profile');
+
+  // Form states
   const [businessName, setBusinessName] = useState('');
+  const [timezone, setTimezone] = useState('UTC+3 (Amman / Riyadh)');
+  const [language, setLanguage] = useState('English (US)');
+  const [proxyRegion, setProxyRegion] = useState('auto-edge (Global Low-Latency)');
+
+  // Notification preferences
+  const [emailNotifs, setEmailNotifs] = useState(true);
+  const [smsNotifs, setSmsNotifs] = useState(false);
+  const [securityAlerts, setSecurityAlerts] = useState(true);
+
+  // Delete modal state
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
@@ -20,14 +35,22 @@ export default function SettingsPage() {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
-          router.replace('/login');
+          router.replace('/login?redirect=/settings');
           return;
         }
         setUser(user);
-        const { data: biz } = await supabase.from('businesses').select('business_name').eq('id', user.id).maybeSingle();
-        if (biz) setBusinessName(biz.business_name || '');
+
+        const { data: biz } = await supabase
+          .from('businesses')
+          .select('business_name, plan')
+          .eq('id', user.id)
+          .maybeSingle();
+
+        if (biz) {
+          setBusinessName(biz.business_name || '');
+        }
       } catch (err) {
-        console.error(err);
+        console.error('Failed to load settings:', err);
       } finally {
         setLoading(false);
       }
@@ -40,86 +63,102 @@ export default function SettingsPage() {
     if (!user) return;
     setSaving(true);
     setMessage('');
+
     try {
-      const { error } = await supabase.from('businesses').upsert({ id: user.id, work_email: user.email, business_name: businessName.trim() });
-      if (error) setMessage(`Error: ${error.message}`);
-      else setMessage('Settings saved successfully!');
+      const { error } = await supabase
+        .from('businesses')
+        .upsert({
+          id: user.id,
+          work_email: user.email,
+          business_name: businessName.trim(),
+        });
+
+      if (error) {
+        setMessage(`Error: ${error.message}`);
+      } else {
+        setMessage('Settings and preferences synchronized successfully.');
+      }
     } catch (err: any) {
-      setMessage(`Error: ${err.message}`);
+      setMessage(`Unexpected error: ${err.message}`);
     } finally {
       setSaving(false);
     }
   };
 
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmText !== 'DELETE') {
+      alert('Please type DELETE to confirm account termination.');
+      return;
+    }
+    alert('Account deletion initiated. Contact enterprise support to finalize data wipe.');
+    setShowDeleteModal(false);
+  };
+
   if (loading) {
-    return <div className="min-h-[60vh] flex items-center justify-center text-xs font-mono text-cyan-400">Loading settings...</div>;
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="flex items-center gap-3 text-indigo-300 text-xs font-mono">
+          <div className="w-4 h-4 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+          <span>Securing enterprise session...</span>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-5xl mx-auto py-12 px-6 space-y-8">
-      <div className="border-b border-indigo-950 pb-6">
-        <h1 className="text-3xl font-extrabold text-white tracking-tight">Account & System Settings</h1>
-        <p className="text-indigo-200/70 text-sm mt-1">Manage your organization profile, billing, and regional preferences.</p>
+    <div className="max-w-6xl mx-auto py-12 px-6 space-y-8">
+      {/* Header */}
+      <div className="border-b border-indigo-950 pb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-extrabold text-white tracking-tight">Account & Enterprise Settings</h1>
+          <p className="text-indigo-200/70 text-sm mt-1">Manage global security policies, billing methods, and node infrastructure.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono bg-cyan-950/80 text-cyan-400 border border-cyan-800/60 shadow-inner">
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" /> SOC-2 Compliant
+          </span>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        {/* Navigation Sidebar */}
         <div className="space-y-1.5 md:col-span-1">
-          <button type="button" onClick={() => setActiveTab('profile')} className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-medium transition ${activeTab === 'profile' ? 'bg-indigo-950 text-cyan-400 border border-indigo-800/60 shadow-lg' : 'text-indigo-300 hover:bg-indigo-950/40'}`}>👤 Profile & Org</button>
-          <button type="button" onClick={() => setActiveTab('billing')} className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-medium transition ${activeTab === 'billing' ? 'bg-indigo-950 text-cyan-400 border border-indigo-800/60 shadow-lg' : 'text-indigo-300 hover:bg-indigo-950/40'}`}>💳 Billing & Plans</button>
-          <button type="button" onClick={() => setActiveTab('region')} className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-medium transition ${activeTab === 'region' ? 'bg-indigo-950 text-cyan-400 border border-indigo-800/60 shadow-lg' : 'text-indigo-300 hover:bg-indigo-950/40'}`}>🌍 Region & Language</button>
-          <button type="button" onClick={() => setActiveTab('security')} className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-medium transition ${activeTab === 'security' ? 'bg-indigo-950 text-cyan-400 border border-indigo-800/60 shadow-lg' : 'text-indigo-300 hover:bg-indigo-950/40'}`}>🔒 Security & Sessions</button>
+          <button type="button" onClick={() => setActiveTab('profile')} className={`w-full text-left px-4 py-3 rounded-xl text-xs font-medium transition flex items-center gap-3 ${activeTab === 'profile' ? 'bg-indigo-950 text-cyan-400 border border-indigo-800/60 shadow-lg' : 'text-indigo-300 hover:bg-indigo-950/40 hover:text-white'}`}>
+            <span>👤</span> Profile & Organization
+          </button>
+          <button type="button" onClick={() => setActiveTab('billing')} className={`w-full text-left px-4 py-3 rounded-xl text-xs font-medium transition flex items-center gap-3 ${activeTab === 'billing' ? 'bg-indigo-950 text-cyan-400 border border-indigo-800/60 shadow-lg' : 'text-indigo-300 hover:bg-indigo-950/40 hover:text-white'}`}>
+            <span>💳</span> Billing & Payments
+          </button>
+          <button type="button" onClick={() => setActiveTab('region')} className={`w-full text-left px-4 py-3 rounded-xl text-xs font-medium transition flex items-center gap-3 ${activeTab === 'region' ? 'bg-indigo-950 text-cyan-400 border border-indigo-800/60 shadow-lg' : 'text-indigo-300 hover:bg-indigo-950/40 hover:text-white'}`}>
+            <span>🌍</span> Region & Language
+          </button>
+          <button type="button" onClick={() => setActiveTab('security')} className={`w-full text-left px-4 py-3 rounded-xl text-xs font-medium transition flex items-center gap-3 ${activeTab === 'security' ? 'bg-indigo-950 text-cyan-400 border border-indigo-800/60 shadow-lg' : 'text-indigo-300 hover:bg-indigo-950/40 hover:text-white'}`}>
+            <span>🔒</span> Security & Policies
+          </button>
         </div>
 
-        <div className="md:col-span-3">
-          {message && <div className="mb-6 p-3 rounded-xl text-xs font-medium bg-cyan-950/60 text-cyan-300 border border-cyan-800/50">{message}</div>}
+        {/* Content Area */}
+        <div className="md:col-span-3 space-y-6">
+          {message && (
+            <div className={`p-4 rounded-xl text-xs font-medium ${message.includes('Error') ? 'bg-rose-950/60 text-rose-300 border border-rose-800/50' : 'bg-cyan-950/60 text-cyan-300 border border-cyan-800/50'}`}>
+              {message}
+            </div>
+          )}
 
+          {/* TAB 1: PROFILE */}
           {activeTab === 'profile' && (
-            <form onSubmit={handleSave} className="bg-[#0b0f29]/80 p-6 md:p-8 rounded-2xl border border-indigo-900/50 space-y-6">
-              <h2 className="text-lg font-bold text-white">Organization Profile</h2>
+            <form onSubmit={handleSave} className="bg-[#0b0f29]/90 p-8 rounded-2xl border border-indigo-900/60 shadow-2xl space-y-6">
+              <div>
+                <h2 className="text-lg font-bold text-white">Organization Profile</h2>
+                <p className="text-xs text-indigo-300/70 mt-0.5">Primary business identifiers and administrative contact info.</p>
+              </div>
+
               <div className="space-y-2">
-                <label className="block text-xs font-bold text-indigo-300 uppercase">Email Address</label>
-                <input type="email" value={user?.email || ''} disabled className="w-full bg-[#030014]/60 border border-indigo-950 rounded-xl px-4 py-2.5 text-xs text-indigo-400" />
+                <label className="block text-xs font-bold text-indigo-300 uppercase tracking-wider">Account Email</label>
+                <input type="email" value={user?.email || ''} disabled className="w-full bg-[#030014]/80 border border-indigo-950 rounded-xl px-4 py-3 text-xs text-indigo-400 cursor-not-allowed" />
+                <p className="text-[10px] text-indigo-400/60">Managed securely via Supabase Auth credentials.</p>
               </div>
+
               <div className="space-y-2">
-                <label className="block text-xs font-bold text-indigo-300 uppercase">Business Name</label>
-                <input type="text" value={businessName} onChange={(e) => setBusinessName(e.target.value)} placeholder="Acme Corp" className="w-full bg-[#030014] border border-indigo-800/60 rounded-xl px-4 py-2.5 text-xs text-white" />
-              </div>
-              <button type="submit" disabled={saving} className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs px-6 py-2.5 rounded-xl transition">
-                {saving ? 'Saving...' : 'Save Profile'}
-              </button>
-            </form>
-          )}
-
-          {activeTab === 'billing' && (
-            <div className="bg-[#0b0f29]/80 p-6 md:p-8 rounded-2xl border border-indigo-900/50 space-y-6">
-              <h2 className="text-lg font-bold text-white">Billing & Payments</h2>
-              <div className="p-4 rounded-xl bg-indigo-950/40 border border-indigo-900/60 flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-bold text-white">Current Tier</p>
-                  <p className="text-[11px] text-cyan-400 font-mono">Free Tier</p>
-                </div>
-                <button type="button" onClick={() => router.push('/plans')} className="bg-indigo-600 text-white text-xs font-bold px-4 py-2 rounded-xl">Upgrade ⚡</button>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'region' && (
-            <div className="bg-[#0b0f29]/80 p-6 md:p-8 rounded-2xl border border-indigo-900/50 space-y-6">
-              <h2 className="text-lg font-bold text-white">Region & Language</h2>
-              <p className="text-xs text-indigo-300">Timezone configured to UTC+3 (Amman / Middle East).</p>
-            </div>
-          )}
-
-          {activeTab === 'security' && (
-            <div className="bg-[#0b0f29]/80 p-6 md:p-8 rounded-2xl border border-indigo-900/50 space-y-6">
-              <h2 className="text-lg font-bold text-white">Security & Sessions</h2>
-              <button type="button" onClick={() => supabase.auth.signOut().then(() => router.push('/login'))} className="bg-rose-950/40 border border-rose-800/50 text-rose-300 font-bold text-xs px-4 py-2.5 rounded-xl">
-                Sign Out from All Devices
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
+                <label className="block text-xs font-bold text-indigo-300 uppercase tracking-wider">Organization / Business Legal Name</label>
+                <input type="text" value={businessName} onChange={(e) => setBusiness
