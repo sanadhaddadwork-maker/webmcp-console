@@ -6,8 +6,9 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 });
 
 const PRICE_IDS: Record<string, string> = {
-  pro: process.env.STRIPE_PRO_PRICE_ID!,
-  enterprise: process.env.STRIPE_ENTERPRISE_PRICE_ID!,
+  starter: process.env.STRIPE_PRICE_STARTER!,
+  pro: process.env.STRIPE_PRICE_PRO!,
+  enterprise: process.env.STRIPE_PRICE_ENTERPRISE!,
 };
 
 export async function POST(req: Request) {
@@ -16,8 +17,10 @@ export async function POST(req: Request) {
     const priceId = PRICE_IDS[planId];
 
     if (!priceId) {
-      return NextResponse.json({ error: 'Invalid plan selected' }, { status: 400 });
+      return NextResponse.json({ error: `Price ID not found for plan: ${planId}` }, { status: 400 });
     }
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://webmcp-console.vercel.app';
 
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
@@ -27,8 +30,8 @@ export async function POST(req: Request) {
           quantity: 1,
         },
       ],
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing`,
+      success_url: `${appUrl}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${appUrl}/plans`,
     });
 
     return NextResponse.json({ url: session.url });
