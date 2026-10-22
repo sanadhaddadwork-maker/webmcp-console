@@ -194,7 +194,6 @@ export default function SettingsPage() {
                   <option value={tz}>{tz} (Detected Browser Timezone)</option>
                   <option value="Asia/Amman">Asia/Amman (UTC+3)</option>
                   <option value="UTC">UTC (Universal Time)</option>
-                  <option value="America/New_York">America/New_York (UTC-5)</option>
                 </select>
               </div>
               <div>
