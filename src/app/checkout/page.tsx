@@ -58,9 +58,9 @@ function ConfirmContent() {
   };
 
   return (
-    <div className="max-w-xl mx-auto py-12 px-6 text-white">
-      {/* Clean transparent container without heavy box background */}
-      <div className="border border-indigo-950/60 rounded-2xl p-8 bg-transparent relative">
+    <div className="max-w-xl mx-auto py-12 px-6 text-white bg-transparent">
+      {/* Explicitly bg-transparent to ensure zero black boxes */}
+      <div className="border border-indigo-900/50 rounded-2xl p-8 bg-transparent relative shadow-none">
         <span className="text-xs font-semibold tracking-wider text-cyan-400 uppercase">Order Summary</span>
         <h1 className="text-3xl font-bold mt-1 mb-2">{plan.name}</h1>
         
@@ -101,7 +101,7 @@ function ConfirmContent() {
 
 export default function ConfirmPlanPage() {
   return (
-    <Suspense fallback={<div className="text-center py-20 text-white">Loading plan summary...</div>}>
+    <Suspense fallback={<div className="text-center py-20 text-white bg-transparent">Loading plan summary...</div>}>
       <ConfirmContent />
     </Suspense>
   );
