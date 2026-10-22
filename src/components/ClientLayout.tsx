@@ -8,17 +8,30 @@ import { createClient } from '@/lib/supabaseBrowser';
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<any>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [userPlan, setUserPlan] = useState<string>('Free Tier');
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const pathname = usePathname();
   const supabase = createClient();
 
   useEffect(() => {
-    async function getUser() {
+    async function getUserData() {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
+
+      if (user) {
+        const { data: biz } = await supabase
+          .from('businesses')
+          .select('plan')
+          .eq('id', user.id)
+          .maybeSingle();
+
+        if (biz?.plan) {
+          setUserPlan(biz.plan);
+        }
+      }
     }
-    getUser();
+    getUserData();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
       setUser(session?.user || null);
@@ -29,7 +42,6 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     };
   }, [supabase]);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -50,19 +62,19 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
   return (
     <div className="min-h-screen flex flex-col text-white">
-      {/* Navbar Header */}
+      {/* Header */}
       <header className="border-b border-indigo-950 bg-[#030014]/60 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 font-bold text-lg text-white">
             <span className="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-600 to-cyan-400 flex items-center justify-center text-xs font-mono">W</span>
-            WebMCP
+            WebMCP <span className="text-[10px] bg-indigo-950 text-indigo-400 border border-indigo-800/60 px-2 py-0.5 rounded-md font-mono">CONSOLE</span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-6 text-xs font-medium text-indigo-200">
-            <Link href="/" className={`hover:text-cyan-400 transition ${pathname === '/' ? 'text-cyan-400' : ''}`}>Home</Link>
-            <Link href="/plans" className={`hover:text-cyan-400 transition ${pathname === '/plans' ? 'text-cyan-400' : ''}`}>Plans & Pricing</Link>
-            <Link href="/api-keys" className={`hover:text-cyan-400 transition ${pathname === '/api-keys' ? 'text-cyan-400' : ''}`}>API Keys</Link>
-            <Link href="/telemetry" className={`hover:text-cyan-400 transition ${pathname === '/telemetry' ? 'text-cyan-400' : ''}`}>Telemetry</Link>
+            <Link href="/" className={`hover:text-cyan-400 transition ${pathname === '/' ? 'text-cyan-400 font-bold' : ''}`}>Home</Link>
+            <Link href="/plans" className={`hover:text-cyan-400 transition ${pathname === '/plans' ? 'text-cyan-400 font-bold' : ''}`}>Plans & Pricing</Link>
+            <Link href="/api-keys" className={`hover:text-cyan-400 transition ${pathname === '/api-keys' ? 'text-cyan-400 font-bold' : ''}`}>API Keys</Link>
+            <Link href="/telemetry" className={`hover:text-cyan-400 transition ${pathname === '/telemetry' ? 'text-cyan-400 font-bold' : ''}`}>Telemetry</Link>
           </nav>
 
           <div className="flex items-center gap-4">
@@ -70,29 +82,77 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className="w-9 h-9 rounded-full bg-indigo-900 border border-indigo-700 flex items-center justify-center font-bold text-xs text-cyan-300 hover:ring-2 hover:ring-cyan-400 transition"
+                  className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-indigo-950/60 border border-indigo-800/60 hover:border-cyan-500/50 transition text-left"
                 >
-                  {user.email ? user.email.charAt(0).toUpperCase() : 'U'}
+                  <div className="w-6 h-6 rounded-lg bg-indigo-900 flex items-center justify-center text-xs font-bold text-cyan-300">
+                    {user.email ? user.email.charAt(0).toUpperCase() : 'U'}
+                  </div>
+                  <div className="hidden sm:block text-[11px]">
+                    <div className="text-white font-medium truncate max-w-[120px]">{user.email?.split('@')[0]}</div>
+                    <div className="text-cyan-400 text-[9px] font-mono">{userPlan}</div>
+                  </div>
+                  <span className="text-indigo-400 text-[10px]">▼</span>
                 </button>
 
                 {dropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-48 rounded-xl bg-[#0b0f29] border border-indigo-900 shadow-2xl py-1 z-50">
-                    <div className="px-4 py-2 border-b border-indigo-950 text-[11px] text-indigo-400 truncate">
-                      {user.email}
+                  <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-[#0b0f29]/95 border border-indigo-900/80 shadow-2xl backdrop-blur-xl p-3 z-50 space-y-3">
+                    {/* Header Info */}
+                    <div className="px-2 pt-1 pb-2 border-b border-indigo-950/80">
+                      <p className="text-[9px] uppercase font-mono text-indigo-400 tracking-wider">Signed in as</p>
+                      <p className="text-xs font-semibold text-white truncate mt-0.5">{user.email}</p>
+                      <span className="inline-block text-[9px] font-mono text-cyan-400 bg-cyan-950/60 border border-cyan-800/40 px-2 py-0.5 rounded-full mt-2">
+                        • {userPlan}
+                      </span>
                     </div>
-                    <Link
-                      href="/settings"
-                      onClick={() => setDropdownOpen(false)}
-                      className="block px-4 py-2 text-xs text-indigo-200 hover:bg-indigo-950/60 hover:text-cyan-400 transition"
-                    >
-                      Settings
-                    </Link>
-                    <button
-                      onClick={handleSignOut}
-                      className="w-full text-left px-4 py-2 text-xs text-rose-400 hover:bg-rose-950/30 transition"
-                    >
-                      Sign Out
-                    </button>
+
+                    {/* Navigation Items */}
+                    <div className="space-y-1 text-xs">
+                      <Link
+                        href="/"
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-white transition"
+                      >
+                        🏠 <span>Home</span>
+                      </Link>
+                      <Link
+                        href="/telemetry"
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-white transition"
+                      >
+                        📊 <span>Telemetry & Analytics</span>
+                      </Link>
+                      <Link
+                        href="/plans"
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-white transition"
+                      >
+                        ⚡ <span>Plans & Pricing</span>
+                      </Link>
+                      <Link
+                        href="/api-keys"
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-white transition"
+                      >
+                        🔑 <span>API Keys & Proxies</span>
+                      </Link>
+                      <Link
+                        href="/settings"
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-cyan-400 transition"
+                      >
+                        ⚙️ <span>Settings</span>
+                      </Link>
+                    </div>
+
+                    {/* Log Out Button */}
+                    <div className="pt-2 border-t border-indigo-950/80">
+                      <button
+                        onClick={handleSignOut}
+                        className="w-full text-left flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs text-rose-400 hover:bg-rose-950/40 transition font-medium"
+                      >
+                        <span>Log Out</span>
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
