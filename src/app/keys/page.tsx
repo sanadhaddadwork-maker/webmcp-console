@@ -18,17 +18,11 @@ export default function ApiKeysPage() {
     setKeyName('');
   };
 
-  const revokeKey = (id: string) => {
-    setKeys(keys.filter(k => k.id !== id));
-  };
-
   return (
     <div className="max-w-5xl mx-auto py-12 px-6 space-y-8 text-white">
-      <div className="border-b border-indigo-950 pb-6 flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-extrabold tracking-tight">API Key Management</h1>
-          <p className="text-indigo-300 text-sm mt-1">Generate and revoke high-privilege bearer tokens for agent proxy requests.</p>
-        </div>
+      <div className="border-b border-indigo-950 pb-6">
+        <h1 className="text-3xl font-extrabold tracking-tight">API Key Management</h1>
+        <p className="text-indigo-300 text-sm mt-1">Generate high-privilege bearer tokens for agent proxy requests.</p>
       </div>
 
       {newKey && (
@@ -56,10 +50,7 @@ export default function ApiKeysPage() {
                 <p className="font-bold text-white">{k.name}</p>
                 <p className="font-mono text-indigo-400 mt-0.5">{k.prefix} • Created {k.created}</p>
               </div>
-              <div className="flex items-center gap-4">
-                <span className="text-cyan-400 font-mono text-[10px]">Last used: {k.lastUsed}</span>
-                <button onClick={() => revokeKey(k.id)} className="bg-rose-950/60 border border-rose-800 text-rose-300 px-3 py-1.5 rounded-lg hover:bg-rose-900 transition">Revoke</button>
-              </div>
+              <button onClick={() => setKeys(keys.filter(item => item.id !== k.id))} className="bg-rose-950/60 border border-rose-800 text-rose-300 px-3 py-1.5 rounded-lg hover:bg-rose-950 transition">Revoke</button>
             </div>
           ))}
         </div>
