@@ -177,4 +177,34 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                         <Link
                           href="/analytics"
                           onClick={() => setDropdownOpen(false)}
-                          className="flex items-center px-4 py-2 text-indigo-200 hover:bg-
+                          className="flex items-center px-4 py-2 text-indigo-200 hover:bg-indigo-950/60 hover:text-white transition-colors"
+                        >
+                          📊 Telemetry &amp; Analytics
+                        </Link>
+                        <Link
+                          href="/plans"
+                          onClick={() => setDropdownOpen(false)}
+                          className="flex items-center px-4 py-2 text-indigo-200 hover:bg-indigo-950/60 hover:text-white transition-colors"
+                        >
+                          ⚡ Plans &amp; Pricing ($0 / $29 / $149 / $499)
+                        </Link>
+                        <Link
+                          href="/keys"
+                          onClick={() => setDropdownOpen(false)}
+                          className="flex items-center px-4 py-2 text-indigo-200 hover:bg-indigo-950/60 hover:text-white transition-colors"
+                        >
+                          🔑 API Keys &amp; Proxies
+                        </Link>
+                        <Link
+                          href="/settings"
+                          onClick={() => setDropdownOpen(false)}
+                          className="flex items-center px-4 py-2 text-indigo-200 hover:bg-indigo-950/60 hover:text-white transition-colors"
+                        >
+                          ⚙️ Settings
+                        </Link>
+                      </div>
+
+                      <div className="py-1">
+                        <button
+                          onClick={handleLogout}
+                          className="w-full text-left px-4 py-2 text-xs text-rose-400 hover
