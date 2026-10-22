@@ -13,9 +13,9 @@ export default function SettingsPage() {
   
   // Form states
   const [businessName, setBusinessName] = useState('');
-  const [timezone, setTimezone] = useState('UTC+3 (Amman / Middle East)');
-  const [language, setLanguage] = useState('English (US)');
-  const [proxyRegion, setProxyRegion] = useState('auto-edge (Global Low-Latency)');
+  const [timezone, setTimezone] = useState('UTC+3');
+  const [language, setLanguage] = useState('English');
+  const [proxyRegion, setProxyRegion] = useState('auto-edge');
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -105,24 +105,28 @@ export default function SettingsPage() {
         {/* Sidebar Navigation Tabs */}
         <div className="space-y-1.5 md:col-span-1">
           <button
+            type="button"
             onClick={() => setActiveTab('profile')}
             className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-medium transition flex items-center gap-2.5 ${activeTab === 'profile' ? 'bg-indigo-950 text-cyan-400 border border-indigo-800/60 shadow-lg' : 'text-indigo-300 hover:bg-indigo-950/40 hover:text-white'}`}
           >
             <span>👤</span> Profile & Organization
           </button>
           <button
+            type="button"
             onClick={() => setActiveTab('billing')}
             className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-medium transition flex items-center gap-2.5 ${activeTab === 'billing' ? 'bg-indigo-950 text-cyan-400 border border-indigo-800/60 shadow-lg' : 'text-indigo-300 hover:bg-indigo-950/40 hover:text-white'}`}
           >
             <span>💳</span> Billing & Payments
           </button>
           <button
+            type="button"
             onClick={() => setActiveTab('region')}
             className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-medium transition flex items-center gap-2.5 ${activeTab === 'region' ? 'bg-indigo-950 text-cyan-400 border border-indigo-800/60 shadow-lg' : 'text-indigo-300 hover:bg-indigo-950/40 hover:text-white'}`}
           >
             <span>🌍</span> Region & Language
           </button>
           <button
+            type="button"
             onClick={() => setActiveTab('security')}
             className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-medium transition flex items-center gap-2.5 ${activeTab === 'security' ? 'bg-indigo-950 text-cyan-400 border border-indigo-800/60 shadow-lg' : 'text-indigo-300 hover:bg-indigo-950/40 hover:text-white'}`}
           >
@@ -171,4 +175,41 @@ export default function SettingsPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="bg-gradient-to-r from-indigo-600 to-cyan-500
+                  className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-xs px-6 py-2.5 rounded-xl transition shadow-lg"
+                >
+                  {saving ? 'Saving...' : 'Save Profile'}
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* TAB 2: BILLING */}
+          {activeTab === 'billing' && (
+            <div className="bg-[#0b0f29]/80 p-6 md:p-8 rounded-2xl border border-indigo-900/50 backdrop-blur-md shadow-xl space-y-6">
+              <div>
+                <h2 className="text-lg font-bold text-white">Billing & Payments</h2>
+                <p className="text-xs text-indigo-300/70 mt-0.5">Manage your subscription plan, invoices, and payment methods.</p>
+              </div>
+
+              <div className="p-4 rounded-xl bg-indigo-950/40 border border-indigo-900/60 flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-bold text-white">Current Active Tier</p>
+                  <p className="text-[11px] text-cyan-400 font-mono mt-0.5">Free Tier — Standard Edge Proxies</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => router.push('/plans')}
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition"
+                >
+                  Upgrade Plan ⚡
+                </button>
+              </div>
+
+              <div className="space-y-3 pt-2">
+                <h3 className="text-xs font-bold text-indigo-300 uppercase tracking-wider">Payment Method</h3>
+                <div className="p-4 rounded-xl bg-[#030014] border border-indigo-900/60 flex items-center justify-between text-xs">
+                  <span className="text-indigo-300">No active card on file (Free Tier)</span>
+                  <span className="text-cyan-400 cursor-pointer hover:underline font-medium">+ Add Payment Card</span>
+                </div>
+              </div>
+            </div>
