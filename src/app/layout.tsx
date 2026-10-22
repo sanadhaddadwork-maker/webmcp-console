@@ -1,4 +1,5 @@
 import './globals.css';
+import ClientLayout from './client-layout';
 
 export const metadata = {
   title: 'WebMCP Console',
@@ -13,7 +14,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen bg-[#030014] text-white antialiased selection:bg-cyan-500 selection:text-black">
-        {children}
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   );
