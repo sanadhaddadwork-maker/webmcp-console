@@ -62,7 +62,8 @@ export default function PlansPage() {
     router.push(`/checkout/confirm?plan=${planId}`);
   };
 
-  const currentPlan = business?.plan || 'Free Tier';
+  // If user is not logged in, currentPlan is null so nothing is highlighted as active
+  const currentPlan = user ? (business?.plan || 'Free Tier') : null;
 
   return (
     <div className="max-w-7xl mx-auto py-12 px-6">
@@ -109,7 +110,7 @@ export default function PlansPage() {
             disabled={currentPlan === 'Free Tier'}
             className="w-full py-2.5 rounded-xl font-bold text-xs transition-all border border-indigo-800/60 text-white bg-indigo-950/40 hover:bg-indigo-900/60 disabled:opacity-50"
           >
-            {currentPlan === 'Free Tier' ? 'Active Plan' : 'Select Free Tier'}
+            {currentPlan === 'Free Tier' ? 'Active Plan' : user ? 'Select Free Tier' : 'Log in to Select'}
           </button>
         </div>
 
