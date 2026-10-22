@@ -116,4 +116,19 @@ export default function SettingsPage() {
               </div>
               <div>
                 <label className="block text-xs font-bold text-indigo-300 uppercase mb-2">Language</label>
-                <select value={lang} onChange={(e) => setLang(e.target.value)} className="w-full bg-[#030014] border border-indigo-800 rounded-xl px-4 py
+                <select value={lang} onChange={(e) => setLang(e.target.value)} className="w-full bg-[#030014] border border-indigo-800 rounded-xl px-4 py-3 text-xs text-white"><option value="English">English (US)</option><option value="Arabic">العربية (Arabic)</option></select>
+              </div>
+              <button onClick={() => alert('Preferences saved!')} className="bg-indigo-600 text-white font-bold text-xs px-6 py-3 rounded-xl">Save Preferences</button>
+            </div>
+          )}
+
+          {tab === 'security' && (
+            <div className="space-y-6">
+              <div className="bg-[#0b0f29] p-8 rounded-2xl border border-indigo-900 space-y-6">
+                <h2 className="text-lg font-bold">Security & Notifications</h2>
+                <div className="flex justify-between items-center p-4 rounded-xl bg-[#030014] border border-indigo-900">
+                  <div>
+                    <p className="text-xs font-bold">Email Security Alerts</p>
+                    <p className="text-[11px] text-indigo-300">Instant notification for new logins.</p>
+                  </div>
+                  <input type="checkbox" checked={
