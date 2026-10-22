@@ -5,6 +5,9 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabaseBrowser';
 
+// Initialize outside component to prevent infinite re-render loops
+const supabase = createClient();
+
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<any>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -12,7 +15,6 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const pathname = usePathname();
-  const supabase = createClient();
 
   useEffect(() => {
     async function getUserData() {
@@ -40,7 +42,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     return () => {
       subscription.unsubscribe();
     };
-  }, [supabase]);
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -63,7 +65,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   return (
     <div className="min-h-screen flex flex-col text-white">
       {/* Header */}
-      <header className="border-b border-indigo-950 bg-[#030014]/60 backdrop-blur-md sticky top-0 z-50">
+      <header className="border-b border-indigo-950 bg-[#030014]/80 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 font-bold text-lg text-white">
             <span className="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-600 to-cyan-400 flex items-center justify-center text-xs font-mono">W</span>
@@ -95,7 +97,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                 </button>
 
                 {dropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-[#0b0f29]/95 border border-indigo-900/80 shadow-2xl backdrop-blur-xl p-3 z-50 space-y-3">
+                  <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-[#0b0f29] border border-indigo-900/80 shadow-2xl p-3 z-50 space-y-3">
                     {/* Header Info */}
                     <div className="px-2 pt-1 pb-2 border-b border-indigo-950/80">
                       <p className="text-[9px] uppercase font-mono text-indigo-400 tracking-wider">Signed in as</p>
