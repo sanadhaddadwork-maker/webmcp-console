@@ -115,4 +115,45 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                         <Link href="/telemetry" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-white transition">
                           📊 <span>Telemetry & Analytics</span>
                         </Link>
-                        <Link href="/plans" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-
+                        <Link href="/plans" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-white transition">
+                          ⚡ <span>Plans & Pricing</span>
+                        </Link>
+                        <Link href="/api-keys" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-white transition">
+                          🔑 <span>API Keys & Proxies</span>
+                        </Link>
+                        <Link href="/settings" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-cyan-400 transition font-medium">
+                          ⚙️ <span>Settings</span>
+                        </Link>
+                      </div>
+
+                      <div className="pt-2 border-t border-indigo-950/80">
+                        <button
+                          onClick={handleSignOut}
+                          className="w-full text-left flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs text-rose-400 hover:bg-rose-950/40 transition font-medium"
+                        >
+                          <span>Log Out</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <Link href="/login" className="text-xs font-medium text-indigo-200 hover:text-white px-3 py-2 transition">
+                    Log In
+                  </Link>
+                  <Link href="/signup" className="text-xs font-bold text-white bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 px-4 py-2 rounded-xl transition shadow-lg shadow-indigo-600/30">
+                    Sign Up
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        </header>
+
+        {/* Page Content */}
+        <main className="flex-1">{children}</main>
+      </body>
+    </html>
+  );
+}
