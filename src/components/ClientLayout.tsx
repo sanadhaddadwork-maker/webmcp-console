@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabaseBrowser';
 
-// Initialize outside component to prevent infinite re-render loops
 const supabase = createClient();
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
@@ -64,7 +63,6 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
   return (
     <div className="min-h-screen flex flex-col text-white">
-      {/* Header */}
       <header className="border-b border-indigo-950 bg-[#030014]/80 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 font-bold text-lg text-white">
@@ -98,7 +96,6 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
                 {dropdownOpen && (
                   <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-[#0b0f29] border border-indigo-900/80 shadow-2xl p-3 z-50 space-y-3">
-                    {/* Header Info */}
                     <div className="px-2 pt-1 pb-2 border-b border-indigo-950/80">
                       <p className="text-[9px] uppercase font-mono text-indigo-400 tracking-wider">Signed in as</p>
                       <p className="text-xs font-semibold text-white truncate mt-0.5">{user.email}</p>
@@ -107,51 +104,26 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                       </span>
                     </div>
 
-                    {/* Navigation Items */}
                     <div className="space-y-1 text-xs">
-                      <Link
-                        href="/"
-                        onClick={() => setDropdownOpen(false)}
-                        className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-white transition"
-                      >
+                      <Link href="/" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-white transition">
                         🏠 <span>Home</span>
                       </Link>
-                      <Link
-                        href="/telemetry"
-                        onClick={() => setDropdownOpen(false)}
-                        className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-white transition"
-                      >
+                      <Link href="/telemetry" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-white transition">
                         📊 <span>Telemetry & Analytics</span>
                       </Link>
-                      <Link
-                        href="/plans"
-                        onClick={() => setDropdownOpen(false)}
-                        className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-white transition"
-                      >
+                      <Link href="/plans" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-white transition">
                         ⚡ <span>Plans & Pricing</span>
                       </Link>
-                      <Link
-                        href="/api-keys"
-                        onClick={() => setDropdownOpen(false)}
-                        className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-white transition"
-                      >
+                      <Link href="/api-keys" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-white transition">
                         🔑 <span>API Keys & Proxies</span>
                       </Link>
-                      <Link
-                        href="/settings"
-                        onClick={() => setDropdownOpen(false)}
-                        className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-cyan-400 transition font-medium"
-                      >
+                      <Link href="/settings" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-cyan-400 transition font-medium">
                         ⚙️ <span>Settings</span>
                       </Link>
                     </div>
 
-                    {/* Log Out Button */}
                     <div className="pt-2 border-t border-indigo-950/80">
-                      <button
-                        onClick={handleSignOut}
-                        className="w-full text-left flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs text-rose-400 hover:bg-rose-950/40 transition font-medium"
-                      >
+                      <button onClick={handleSignOut} className="w-full text-left flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs text-rose-400 hover:bg-rose-950/40 transition font-medium">
                         <span>Log Out</span>
                       </button>
                     </div>
@@ -172,7 +144,6 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         </div>
       </header>
 
-      {/* Main Page Content */}
       <main className="flex-1">
         {children}
       </main>
