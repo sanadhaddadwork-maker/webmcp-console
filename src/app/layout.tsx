@@ -1,5 +1,5 @@
 import './globals.css';
-import ClientLayout from './client-layout'; // Or wherever your client layout / children are wrapped
+import ClientLayout from './client-layout';
 
 export const metadata = {
   title: 'WebMCP Console',
@@ -12,8 +12,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="bg-[#030014]">
-      <body className="min-h-screen bg-[#030014] text-white antialiased">
+    <html lang="en">
+      <body className="antialiased selection:bg-cyan-500 selection:text-black">
         <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
