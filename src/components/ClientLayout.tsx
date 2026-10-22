@@ -138,7 +138,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                       <Link
                         href="/settings"
                         onClick={() => setDropdownOpen(false)}
-                        className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-cyan-400 transition"
+                        className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-cyan-400 transition font-medium"
                       >
                         ⚙️ <span>Settings</span>
                       </Link>
