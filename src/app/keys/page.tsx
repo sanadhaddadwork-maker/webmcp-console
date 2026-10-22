@@ -104,7 +104,6 @@ export default function ApiKeysPage() {
     }
   }
 
-  // Prevent UI flash by returning loading screen until auth check finishes
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
@@ -181,6 +180,60 @@ export default function ApiKeysPage() {
             ))}
           </div>
         )}
+      </div>
+
+      {/* Developer Integration Guide Card */}
+      <div className="bg-[#0b0f29]/80 border border-indigo-900/50 rounded-2xl p-6 backdrop-blur-md shadow-xl space-y-6">
+        <div>
+          <h2 className="text-sm font-bold text-white uppercase tracking-wider mb-1">Integration Guide</h2>
+          <p className="text-xs text-indigo-300/70">
+            Follow these step-by-step instructions to connect your website and make it AI-accessible using your WebMCP keys.
+          </p>
+        </div>
+
+        <div className="space-y-4 text-xs text-indigo-200">
+          <div className="p-4 rounded-xl bg-indigo-950/30 border border-indigo-900/40 space-y-2">
+            <div className="font-bold text-cyan-400">Step 1: Store your API Key securely</div>
+            <p className="text-indigo-300/80">
+              Copy one of your active keys above and add it to your server-side environment configuration file (e.g., <code className="text-cyan-300 bg-cyan-950/50 px-1.5 py-0.5 rounded font-mono">.env.local</code>):
+            </p>
+            <pre className="p-3 rounded-lg bg-[#030014] text-cyan-300 font-mono text-[11px] border border-indigo-900/50 overflow-x-auto">
+{`WEB_MCP_API_KEY=mcp_live_your_actual_key_here
+WEB_MCP_PROXY_URL=https://webmcp-console.vercel.app/api/proxy`}
+            </pre>
+          </div>
+
+          <div className="p-4 rounded-xl bg-indigo-950/30 border border-indigo-900/40 space-y-2">
+            <div className="font-bold text-cyan-400">Step 2: Route agent requests through the proxy</div>
+            <p className="text-indigo-300/80">
+              When your AI agents or LLMs need to interact with your application backend, execute queries through the WebMCP proxy endpoint with your Bearer token:
+            </p>
+            <pre className="p-3 rounded-lg bg-[#030014] text-cyan-300 font-mono text-[11px] border border-indigo-900/50 overflow-x-auto">
+{`async function queryAgentAction(promptText: string) {
+  const response = await fetch('https://webmcp-console.vercel.app/api/proxy', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': \`Bearer \${process.env.WEB_MCP_API_KEY}\`,
+    },
+    body: JSON.stringify({
+      agent_id: 'primary-dev-agent',
+      prompt: promptText,
+    }),
+  });
+
+  return await response.json();
+}`}
+            </pre>
+          </div>
+
+          <div className="p-4 rounded-xl bg-indigo-950/30 border border-indigo-900/40 space-y-2">
+            <div className="font-bold text-cyan-400">Step 3: Monitor traffic in Telemetry</div>
+            <p className="text-indigo-300/80">
+              Once live traffic begins flowing through your proxy endpoint, check your <strong>Telemetry</strong> tab in the console to inspect request volume, routing latency, and execution payloads in real time.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
