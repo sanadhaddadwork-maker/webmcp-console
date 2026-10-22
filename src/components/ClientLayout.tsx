@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabaseBrowser';
 
-// Initialize outside component to prevent infinite re-render loops
 const supabase = createClient();
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
@@ -72,13 +71,12 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             WebMCP <span className="text-[10px] bg-indigo-950 text-indigo-400 border border-indigo-800/60 px-2 py-0.5 rounded-md font-mono">CONSOLE</span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-5 text-xs font-medium text-indigo-200">
+          <nav className="hidden md:flex items-center gap-6 text-xs font-medium text-indigo-200">
+            <Link href="/" className={`hover:text-cyan-400 transition ${pathname === '/' ? 'text-cyan-400 font-bold' : ''}`}>Home</Link>
             <Link href="/telemetry" className={`hover:text-cyan-400 transition ${pathname === '/telemetry' ? 'text-cyan-400 font-bold' : ''}`}>Telemetry</Link>
             <Link href="/api-keys" className={`hover:text-cyan-400 transition ${pathname === '/api-keys' ? 'text-cyan-400 font-bold' : ''}`}>API Keys</Link>
-            <Link href="/playground" className={`hover:text-cyan-400 transition ${pathname === '/playground' ? 'text-cyan-400 font-bold' : ''}`}>Playground</Link>
-            <Link href="/webhooks" className={`hover:text-cyan-400 transition ${pathname === '/webhooks' ? 'text-cyan-400 font-bold' : ''}`}>Webhooks</Link>
-            <Link href="/domains" className={`hover:text-cyan-400 transition ${pathname === '/domains' ? 'text-cyan-400 font-bold' : ''}`}>Domains</Link>
-            <Link href="/plans" className={`hover:text-cyan-400 transition ${pathname === '/plans' ? 'text-cyan-400 font-bold' : ''}`}>Plans</Link>
+            <Link href="/plans" className={`hover:text-cyan-400 transition ${pathname === '/plans' ? 'text-cyan-400 font-bold' : ''}`}>Plans & Pricing</Link>
+            <Link href="/settings" className={`hover:text-cyan-400 transition ${pathname === '/settings' ? 'text-cyan-400 font-bold' : ''}`}>Settings</Link>
           </nav>
 
           <div className="flex items-center gap-4">
@@ -109,20 +107,17 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                     </div>
 
                     <div className="space-y-1 text-xs">
+                      <Link href="/" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-white transition">
+                        🏠 <span>Home</span>
+                      </Link>
                       <Link href="/telemetry" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-white transition">
                         📊 <span>Telemetry & Analytics</span>
                       </Link>
+                      <Link href="/plans" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-white transition">
+                        ⚡ <span>Plans & Pricing</span>
+                      </Link>
                       <Link href="/api-keys" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-white transition">
-                        🔑 <span>API Keys</span>
-                      </Link>
-                      <Link href="/playground" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-white transition">
-                        ⚡ <span>API Playground</span>
-                      </Link>
-                      <Link href="/webhooks" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-white transition">
-                        🔔 <span>Webhooks & Alerts</span>
-                      </Link>
-                      <Link href="/domains" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-white transition">
-                        🌐 <span>Custom Domains</span>
+                        🔑 <span>API Keys & Proxies</span>
                       </Link>
                       <Link href="/settings" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-cyan-400 transition font-medium">
                         ⚙️ <span>Settings</span>
@@ -154,10 +149,8 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         </div>
       </header>
 
-      {/* Main Page Content */}
-      <main className="flex-1">
-        {children}
-      </main>
+      {/* Main Content */}
+      <main className="flex-1">{children}</main>
     </div>
   );
 }
