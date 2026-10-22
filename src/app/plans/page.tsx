@@ -181,7 +181,8 @@ export default function PlansPage() {
             </div>
             <p className="text-xs text-indigo-300/70 mb-6">Custom SLA, dedicated infrastructure, & zero limits.</p>
             <div className="mb-6">
-              <span className="text-3xl font-black text-white">Custom</span>
+              <span className="text-3xl font-black text-white">$499</span>
+              <span className="text-xs text-indigo-300">/month</span>
             </div>
             <ul className="space-y-3 text-xs text-indigo-200 mb-8">
               <li className="flex items-center"><span className="text-cyan-400 mr-2">✓</span> Unlimited requests</li>
