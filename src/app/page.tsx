@@ -27,18 +27,21 @@ export default function HomePage() {
           <div className="flex flex-wrap items-center justify-center gap-4 pt-6">
             <Link
               href="/keys"
+              prefetch={true}
               className="bg-white text-black hover:bg-gray-100 font-bold text-sm px-8 py-4 rounded-xl transition-all shadow-2xl shadow-white/20 hover:scale-105"
             >
               Deploy Agent Keys Free 🔑
             </Link>
             <Link
               href="/analytics"
+              prefetch={true}
               className="bg-indigo-950/60 hover:bg-indigo-900/80 text-indigo-200 border border-indigo-700/60 font-bold text-sm px-8 py-4 rounded-xl transition-all backdrop-blur-xl hover:border-cyan-400"
             >
               Watch Live Telemetry 📊
             </Link>
             <Link
               href="/plans"
+              prefetch={true}
               className="bg-[#090520]/90 hover:bg-indigo-950/90 text-cyan-300 border border-cyan-500/50 font-bold text-sm px-8 py-4 rounded-xl transition-all backdrop-blur-xl shadow-lg shadow-cyan-500/10 hover:scale-105"
             >
               Explore Pricing ⚡
@@ -180,6 +183,7 @@ export default function HomePage() {
           <div className="pt-2">
             <Link
               href="/keys"
+              prefetch={true}
               className="inline-flex items-center gap-2 text-xs font-bold text-cyan-400 hover:text-cyan-300 bg-cyan-950/60 border border-cyan-800/60 px-5 py-2.5 rounded-xl transition-colors shadow-lg"
             >
               <span>Get Your API Key Now</span>
