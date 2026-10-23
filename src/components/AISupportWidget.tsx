@@ -1,6 +1,9 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { createClient } from '@/lib/supabaseBrowser';
+
+const supabase = createClient();
 
 interface Message {
   role: 'assistant' | 'user';
@@ -14,11 +17,18 @@ export default function AISupportWidget() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content: "Hey there! 👋 I'm your WebMCP AI Assistant. Running into trouble with your edge proxy, API keys, or agent manifest setup? Ask me anything!"
+      content: "Hey there! 👋 I'm your WebMCP AI Assistant. Running into trouble with your edge proxy, API keys, or agent manifest setup? Ask me anything or attach your telemetry diagnostics!"
     }
   ]);
   const [isTyping, setIsTyping] = useState(false);
   
+  // User metadata and telemetry state
+  const [userId, setUserId] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [userPlan, setUserPlan] = useState<string>('Free Tier');
+  const [attachedTelemetry, setAttachedTelemetry] = useState<any>(null);
+  const [isCapturing, setIsCapturing] = useState(false);
+
   // Ticket form state
   const [ticketSubject, setTicketSubject] = useState('');
   const [ticketDesc, setTicketDesc] = useState('');
@@ -28,10 +38,69 @@ export default function AISupportWidget() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isTyping]);
+    async function loadUserContext() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserId(user.id);
+        setUserEmail(user.email || null);
+        const { data: biz } = await supabase
+          .from('businesses')
+          .select('plan')
+          .eq('id', user.id)
+          .maybeSingle();
 
-  // Goal 1: Automatically pre-fill ticket fields when switching views
+        if (biz?.plan) {
+          setUserPlan(biz.plan);
+        }
+      }
+    }
+    loadUserContext();
+  }, []);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isTyping, attachedTelemetry]);
+
+  // Goal 4: Capture live logs & telemetry from Supabase
+  const handleCaptureTelemetry = async () => {
+    setIsCapturing(true);
+    try {
+      let telemetryData = { error: 'No recent telemetry rows found' };
+      if (userId) {
+        const { data } = await supabase
+          .from('telemetry')
+          .select('*')
+          .eq('business_id', userId)
+          .order('created_at', { ascending: false })
+          .limit(5);
+        if (data && data.length > 0) {
+          telemetryData = { recentRequests: data };
+        }
+      }
+
+      const clientInfo = {
+        userAgent: navigator.userAgent,
+        currentPath: window.location.pathname,
+        timestamp: new Date().toISOString()
+      };
+
+      const payload = { clientInfo, telemetryData };
+      setAttachedTelemetry(payload);
+
+      setMessages(prev => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: "📊 **Telemetry Attached Successfully!** I've captured your recent request logs and browser environment. Ask your question now, and I'll analyze your live data."
+        }
+      ]);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsCapturing(false);
+    }
+  };
+
   const handleToggleView = () => {
     if (view === 'chat') {
       const userQueries = messages.filter(m => m.role === 'user').map(m => m.content);
@@ -47,7 +116,7 @@ export default function AISupportWidget() {
           .join('\n\n');
 
         setTicketSubject(generatedSubject);
-        setTicketDesc(`--- AI Chat Diagnostic Transcript ---\n${formattedHistory}\n\n--- Additional Notes ---\n`);
+        setTicketDesc(`--- Account Context ---\nUser: ${userEmail || 'Guest'}\nPlan: ${userPlan}\n${attachedTelemetry ? `\n--- Attached Telemetry ---\n${JSON.stringify(attachedTelemetry, null, 2)}` : ''}\n\n--- AI Chat Transcript ---\n${formattedHistory}\n\n--- Additional Notes ---\n`);
       }
       setView('ticket');
     } else {
@@ -69,7 +138,12 @@ export default function AISupportWidget() {
       const res = await fetch('/api/support', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: newMessages })
+        body: JSON.stringify({ 
+          messages: newMessages,
+          userPlan,
+          userEmail,
+          telemetryLogs: attachedTelemetry
+        })
       });
 
       const data = await res.json();
@@ -90,12 +164,12 @@ export default function AISupportWidget() {
       setTicketSubmitted(false);
       setTicketSubject('');
       setTicketDesc('');
+      setAttachedTelemetry(null);
       setView('chat');
       setMessages(prev => [...prev, { role: 'assistant', content: "Your support ticket has been successfully transmitted to our engineering team! We'll review it and reach out shortly." }]);
     }, 2000);
   };
 
-  // Goal 2: Helper to render markdown code blocks with interactive Copy buttons
   const renderFormattedMessage = (content: string, msgIndex: number) => {
     const parts = content.split(/(```[\s\S]*?```)/g);
 
@@ -137,7 +211,6 @@ export default function AISupportWidget() {
 
   return (
     <div className="fixed bottom-6 right-6 z-50 font-sans">
-      {/* Floating Toggle Button */}
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
@@ -149,19 +222,22 @@ export default function AISupportWidget() {
         </button>
       )}
 
-      {/* Chat / Support Window Drawer */}
       {isOpen && (
-        <div className="w-[380px] sm:w-[420px] h-[580px] bg-[#0b0f29] border border-indigo-900/80 rounded-3xl shadow-2xl flex flex-col overflow-hidden backdrop-blur-2xl animate-in fade-in slide-in-from-bottom-5 duration-200">
+        <div className="w-[380px] sm:w-[420px] h-[610px] bg-[#0b0f29] border border-indigo-900/80 rounded-3xl shadow-2xl flex flex-col overflow-hidden backdrop-blur-2xl animate-in fade-in slide-in-from-bottom-5 duration-200">
           
-          {/* Header */}
-          <div className="bg-[#030014]/90 border-b border-indigo-950 px-5 py-4 flex items-center justify-between">
+          <div className="bg-[#030014]/90 border-b border-indigo-950 px-5 py-3.5 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-cyan-400 flex items-center justify-center text-xs font-bold shadow-md">
                 AI
               </div>
               <div>
-                <h3 className="text-xs font-bold text-white">WebMCP Assistant</h3>
-                <p className="text-[10px] text-cyan-400 font-mono">Online • Instant Solutions</p>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-xs font-bold text-white">WebMCP Assistant</h3>
+                  <span className="text-[9px] font-mono bg-cyan-950 text-cyan-300 border border-cyan-800/60 px-1.5 py-0.2 rounded">
+                    {userPlan}
+                  </span>
+                </div>
+                <p className="text-[10px] text-cyan-400 font-mono">Online • Live Diagnostics Active</p>
               </div>
             </div>
 
@@ -181,10 +257,25 @@ export default function AISupportWidget() {
             </div>
           </div>
 
-          {/* Body Content */}
           {view === 'chat' ? (
             <>
-              {/* Messages Container */}
+              {/* Telemetry attachment bar */}
+              <div className="bg-indigo-950/50 border-b border-indigo-900/40 px-4 py-2 flex items-center justify-between text-[11px]">
+                <div className="flex items-center gap-2 text-indigo-200">
+                  <span>📊 Diagnostics:</span>
+                  <span className={attachedTelemetry ? "text-emerald-400 font-mono" : "text-amber-400 font-mono"}>
+                    {attachedTelemetry ? "Attached ✓" : "Not Attached"}
+                  </span>
+                </div>
+                <button
+                  onClick={handleCaptureTelemetry}
+                  disabled={isCapturing}
+                  className="text-[10px] font-mono bg-indigo-900/80 hover:bg-indigo-800 text-cyan-300 border border-indigo-700/60 px-3 py-1 rounded-lg transition shadow-sm disabled:opacity-50"
+                >
+                  {isCapturing ? 'Capturing...' : 'Attach Logs 🔄'}
+                </button>
+              </div>
+
               <div className="flex-1 overflow-y-auto p-4 space-y-3.5">
                 {messages.map((msg, idx) => (
                   <div
@@ -215,7 +306,6 @@ export default function AISupportWidget() {
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Chat Input Footer */}
               <form onSubmit={handleSendMessage} className="p-3 bg-[#030014]/60 border-t border-indigo-950 flex items-center gap-2">
                 <input
                   type="text"
@@ -233,7 +323,6 @@ export default function AISupportWidget() {
               </form>
             </>
           ) : (
-            /* Escalation Ticket Form */
             <div className="flex-1 overflow-y-auto p-5 space-y-4">
               {ticketSubmitted ? (
                 <div className="h-full flex flex-col items-center justify-center text-center space-y-3">
