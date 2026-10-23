@@ -65,7 +65,7 @@ export default function AISupportWidget() {
   const handleCaptureTelemetry = async () => {
     setIsCapturing(true);
     try {
-      let telemetryData = { error: 'No recent telemetry rows found' };
+      let telemetryData: any = { error: 'No recent telemetry rows found' };
       if (userId) {
         const { data } = await supabase
           .from('telemetry')
