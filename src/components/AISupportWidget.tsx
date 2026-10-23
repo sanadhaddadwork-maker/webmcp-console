@@ -30,6 +30,33 @@ export default function AISupportWidget() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
+  // Goal 1: Automatically pre-fill ticket fields when switching views
+  const handleToggleView = () => {
+    if (view === 'chat') {
+      // Extract user messages to form subject and description
+      const userQueries = messages.filter(m => m.role === 'user').map(m => m.content);
+      
+      if (userQueries.length > 0) {
+        // Synthesize subject from the latest query
+        const latestQuery = userQueries[userQueries.length - 1];
+        const generatedSubject = latestQuery.length > 50 
+          ? `${latestQuery.substring(0, 47)}...` 
+          : latestQuery;
+        
+        // Format full conversation log for description
+        const formattedHistory = messages
+          .map(m => `[${m.role.toUpperCase()}]: ${m.content}`)
+          .join('\n\n');
+
+        setTicketSubject(generatedSubject);
+        setTicketDesc(`--- AI Chat Diagnostic Transcript ---\n${formattedHistory}\n\n--- Additional Notes ---\n`);
+      }
+      setView('ticket');
+    } else {
+      setView('chat');
+    }
+  };
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
@@ -102,7 +129,7 @@ export default function AISupportWidget() {
 
             <div className="flex items-center gap-2">
               <button 
-                onClick={() => setView(view === 'chat' ? 'ticket' : 'chat')}
+                onClick={handleToggleView}
                 className="text-[10px] font-mono bg-indigo-950/80 hover:bg-indigo-900 text-indigo-200 border border-indigo-800/60 px-2.5 py-1 rounded-lg transition"
               >
                 {view === 'chat' ? '🛠️ Contact Us' : '💬 AI Chat'}
@@ -201,11 +228,11 @@ export default function AISupportWidget() {
                     <label className="text-[10px] font-mono uppercase text-indigo-400">Detailed Description</label>
                     <textarea
                       required
-                      rows={4}
+                      rows={5}
                       value={ticketDesc}
                       onChange={(e) => setTicketDesc(e.target.value)}
                       placeholder="Paste your error codes, steps to reproduce, or code snippet..."
-                      className="w-full bg-indigo-950/40 border border-indigo-800/60 rounded-xl p-3 text-xs text-white placeholder-indigo-400/50 focus:outline-none focus:border-cyan-500 transition resize-none"
+                      className="w-full bg-indigo-950/40 border border-indigo-800/60 rounded-xl p-3 text-xs text-white placeholder-indigo-400/50 focus:outline-none focus:border-cyan-500 transition resize-none font-mono text-[11px]"
                     />
                   </div>
 
