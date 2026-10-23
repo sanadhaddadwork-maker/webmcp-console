@@ -4,9 +4,10 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabaseBrowser';
 
+const supabase = createClient();
+
 export default function PlansPage() {
   const router = useRouter();
-  const supabase = createClient();
   const [user, setUser] = useState<any>(null);
   const [business, setBusiness] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -38,7 +39,7 @@ export default function PlansPage() {
     }
 
     loadUserData();
-  }, [supabase]);
+  }, []); // Run once on mount
 
   const handleSelectPlan = (planId: string) => {
     if (!user) {
