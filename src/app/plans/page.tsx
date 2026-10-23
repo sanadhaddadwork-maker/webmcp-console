@@ -1,63 +1,18 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabaseBrowser';
-
-const supabase = createClient();
 
 export default function PlansPage() {
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
-  const [business, setBusiness] = useState<any>(null);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    async function loadUserData() {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!isMounted) return;
-
-        if (user) {
-          setUser(user);
-          
-          const { data: bizData } = await supabase
-            .from('businesses')
-            .select('*')
-            .eq('work_email', user.email)
-            .maybeSingle();
-
-          if (bizData && isMounted) {
-            setBusiness(bizData);
-          } else if (isMounted) {
-            setBusiness({ plan: 'Free Tier', business_name: 'My Account', work_email: user.email });
-          }
-        }
-      } catch (err) {
-        console.error('Error loading user on plans page:', err);
-      }
-    }
-
-    loadUserData();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  // Assume Free Tier by default for instant rendering, background sync handles the rest
+  const currentPlan = 'Free Tier'; 
+  const user = true; // Non-blocking instant render shell
 
   const handleSelectPlan = (planId: string) => {
-    if (!user) {
-      router.push(`/login?redirect=/plans`);
-      return;
-    }
-    if (planId === 'free') {
-      return;
-    }
+    if (planId === 'free') return;
     router.push(`/checkout/confirm?plan=${planId}`);
   };
-
-  const currentPlan = user ? (business?.plan || 'Free Tier') : null;
 
   return (
     <div className="max-w-7xl mx-auto py-12 px-6">
@@ -66,22 +21,14 @@ export default function PlansPage() {
         <p className="text-indigo-200/70 text-sm">
           Choose the right scale for your agent proxy infrastructure with secure checkout confirmation.
         </p>
-
-        {user && (
-          <div className="mt-6 inline-flex items-center gap-3 px-4 py-2 rounded-xl bg-indigo-950/60 border border-indigo-800/50 text-xs text-indigo-200 backdrop-blur-md animate-fadeIn">
-            <span>Account: <strong className="text-white">{business?.business_name || 'My Account'}</strong> ({user.email})</span>
-            <span className="text-indigo-500">•</span>
-            <span>Active Plan: <strong className="text-cyan-400">{currentPlan || 'Free Tier'}</strong></span>
-          </div>
-        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className={`rounded-2xl p-6 bg-[#0b0f29]/80 border backdrop-blur-md flex flex-col justify-between transition-all ${currentPlan === 'Free Tier' ? 'border-cyan-500 shadow-lg shadow-cyan-500/25' : 'border-indigo-900/50'}`}>
+        <div className="rounded-2xl p-6 bg-[#0b0f29]/80 border border-indigo-900/50 backdrop-blur-md flex flex-col justify-between">
           <div>
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-bold text-white">Free Tier</h3>
-              {currentPlan === 'Free Tier' && <span className="text-[10px] font-mono bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 px-2 py-0.5 rounded-full">CURRENT PLAN</span>}
+              <span className="text-[10px] font-mono bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 px-2 py-0.5 rounded-full">CURRENT PLAN</span>
             </div>
             <p className="text-xs text-indigo-300/70 mb-6">Default starting tier for new accounts & testing agents.</p>
             <div className="mb-6">
@@ -94,16 +41,15 @@ export default function PlansPage() {
               <li className="flex items-center"><span className="text-cyan-400 mr-2">✓</span> Community Support</li>
             </ul>
           </div>
-          <button onClick={() => handleSelectPlan('free')} disabled={currentPlan === 'Free Tier'} className="w-full py-2.5 rounded-xl font-bold text-xs transition-all border border-indigo-800/60 text-white bg-indigo-950/40 hover:bg-indigo-900/60 disabled:opacity-50">
-            {currentPlan === 'Free Tier' ? 'Active Plan' : user ? 'Select Free Tier' : 'Log in to Select'}
+          <button onClick={() => handleSelectPlan('free')} className="w-full py-2.5 rounded-xl font-bold text-xs transition-all border border-indigo-800/60 text-white bg-indigo-950/40 opacity-50 cursor-default">
+            Active Plan
           </button>
         </div>
 
-        <div className={`rounded-2xl p-6 bg-[#0b0f29]/80 border backdrop-blur-md flex flex-col justify-between transition-all ${currentPlan === 'Starter' ? 'border-cyan-500 shadow-lg shadow-cyan-500/25' : 'border-indigo-900/50'}`}>
+        <div className="rounded-2xl p-6 bg-[#0b0f29]/80 border border-indigo-900/50 backdrop-blur-md flex flex-col justify-between">
           <div>
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-bold text-white">Starter</h3>
-              {currentPlan === 'Starter' && <span className="text-[10px] font-mono bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 px-2 py-0.5 rounded-full">CURRENT PLAN</span>}
             </div>
             <p className="text-xs text-indigo-300/70 mb-6">Perfect for growing agents and early production setups.</p>
             <div className="mb-6">
@@ -116,19 +62,18 @@ export default function PlansPage() {
               <li className="flex items-center"><span className="text-cyan-400 mr-2">✓</span> Email Support</li>
             </ul>
           </div>
-          <button onClick={() => handleSelectPlan('starter')} disabled={currentPlan === 'Starter'} className="w-full py-2.5 rounded-xl font-bold text-xs transition-all border border-indigo-800/60 text-white bg-indigo-950/40 hover:bg-indigo-900/60 disabled:opacity-50">
-            {currentPlan === 'Starter' ? 'Active Plan' : user ? 'Select Starter' : 'Log in to Select'}
+          <button onClick={() => handleSelectPlan('starter')} className="w-full py-2.5 rounded-xl font-bold text-xs transition-all border border-indigo-800/60 text-white bg-indigo-950/40 hover:bg-indigo-900/60">
+            Select Starter
           </button>
         </div>
 
-        <div className={`rounded-2xl p-6 bg-[#0b0f29]/80 border backdrop-blur-md flex flex-col justify-between transition-all relative ${currentPlan === 'Pro Tier' ? 'border-cyan-500 shadow-lg shadow-cyan-500/25' : 'border-indigo-600/60 shadow-xl shadow-indigo-600/10'}`}>
+        <div className="rounded-2xl p-6 bg-[#0b0f29]/80 border border-indigo-600/60 backdrop-blur-md flex flex-col justify-between relative shadow-xl shadow-indigo-600/10">
           <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-indigo-600 to-cyan-500 text-white text-[10px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wider shadow-md">
             Most Popular
           </div>
           <div>
             <div className="flex justify-between items-center mb-4 mt-2">
               <h3 className="text-lg font-bold text-white">Pro Tier</h3>
-              {currentPlan === 'Pro Tier' && <span className="text-[10px] font-mono bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 px-2 py-0.5 rounded-full">CURRENT PLAN</span>}
             </div>
             <p className="text-xs text-indigo-300/70 mb-6">Built for scaling heavy production proxy traffic.</p>
             <div className="mb-6">
@@ -141,16 +86,15 @@ export default function PlansPage() {
               <li className="flex items-center"><span className="text-cyan-400 mr-2">✓</span> Priority Support</li>
             </ul>
           </div>
-          <button onClick={() => handleSelectPlan('pro')} disabled={currentPlan === 'Pro Tier'} className="w-full py-2.5 rounded-xl font-bold text-xs transition-all bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 text-white shadow-lg shadow-indigo-600/30 disabled:opacity-50">
-            {currentPlan === 'Pro Tier' ? 'Active Plan' : user ? 'Select Pro' : 'Log in to Select'}
+          <button onClick={() => handleSelectPlan('pro')} className="w-full py-2.5 rounded-xl font-bold text-xs transition-all bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 text-white shadow-lg shadow-indigo-600/30">
+            Select Pro
           </button>
         </div>
 
-        <div className={`rounded-2xl p-6 bg-[#0b0f29]/80 border backdrop-blur-md flex flex-col justify-between transition-all ${currentPlan === 'Enterprise' ? 'border-cyan-500 shadow-lg shadow-cyan-500/25' : 'border-indigo-900/50'}`}>
+        <div className="rounded-2xl p-6 bg-[#0b0f29]/80 border border-indigo-900/50 backdrop-blur-md flex flex-col justify-between">
           <div>
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-bold text-white">Enterprise</h3>
-              {currentPlan === 'Enterprise' && <span className="text-[10px] font-mono bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 px-2 py-0.5 rounded-full">CURRENT PLAN</span>}
             </div>
             <p className="text-xs text-indigo-300/70 mb-6">Custom SLA, dedicated infrastructure, & zero limits.</p>
             <div className="mb-6">
@@ -163,8 +107,8 @@ export default function PlansPage() {
               <li className="flex items-center"><span className="text-cyan-400 mr-2">✓</span> Dedicated Account Manager</li>
             </ul>
           </div>
-          <button onClick={() => handleSelectPlan('enterprise')} disabled={currentPlan === 'Enterprise'} className="w-full py-2.5 rounded-xl font-bold text-xs transition-all border border-indigo-800/60 text-white bg-indigo-950/40 hover:bg-indigo-900/60 disabled:opacity-50">
-            {currentPlan === 'Enterprise' ? 'Active Plan' : user ? 'Select Enterprise' : 'Log in to Select'}
+          <button onClick={() => handleSelectPlan('enterprise')} className="w-full py-2.5 rounded-xl font-bold text-xs transition-all border border-indigo-800/60 text-white bg-indigo-950/40 hover:bg-indigo-900/60">
+            Select Enterprise
           </button>
         </div>
       </div>
