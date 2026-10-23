@@ -19,8 +19,6 @@ export default function SettingsPage() {
   const [region, setRegion] = useState('auto-edge');
   const [notif, setNotif] = useState(true);
 
-  const [showDel, setShowDel] = useState(false);
-  const [delText, setDelText] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
@@ -31,18 +29,24 @@ export default function SettingsPage() {
   };
 
   useEffect(() => {
+    let isMounted = true;
+
     try {
       const detectedTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      if (detectedTz) setTz(detectedTz);
+      if (detectedTz && isMounted) setTz(detectedTz);
     } catch (e) {
       console.error('Timezone auto-detection failed:', e);
     }
 
-    supabase.auth.getUser().then(async ({ data }) => {
+    async function loadSettings() {
+      const { data } = await supabase.auth.getUser();
+      
       if (!data.user) {
-        router.replace('/login');
+        if (isMounted) router.replace('/login');
         return;
       }
+
+      if (!isMounted) return;
       setUser(data.user);
 
       const { data: b } = await supabase
@@ -51,7 +55,7 @@ export default function SettingsPage() {
         .eq('id', data.user.id)
         .maybeSingle();
 
-      if (b) {
+      if (b && isMounted) {
         setBizName(b.business_name || '');
         setFullName(b.full_name || '');
         setUsername(b.username || '');
@@ -59,9 +63,16 @@ export default function SettingsPage() {
         if (b.region) setRegion(b.region);
         if (b.language) setLang(b.language);
       }
-      setLoading(false);
-    });
-  }, [router]);
+      
+      if (isMounted) setLoading(false);
+    }
+
+    loadSettings();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []); // Run strictly once on mount
 
   const handleSaveAll = async (e: React.FormEvent) => {
     e.preventDefault();
