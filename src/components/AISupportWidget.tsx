@@ -23,6 +23,7 @@ export default function AISupportWidget() {
   const [ticketSubject, setTicketSubject] = useState('');
   const [ticketDesc, setTicketDesc] = useState('');
   const [ticketSubmitted, setTicketSubmitted] = useState(false);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -33,17 +34,14 @@ export default function AISupportWidget() {
   // Goal 1: Automatically pre-fill ticket fields when switching views
   const handleToggleView = () => {
     if (view === 'chat') {
-      // Extract user messages to form subject and description
       const userQueries = messages.filter(m => m.role === 'user').map(m => m.content);
       
       if (userQueries.length > 0) {
-        // Synthesize subject from the latest query
         const latestQuery = userQueries[userQueries.length - 1];
         const generatedSubject = latestQuery.length > 50 
           ? `${latestQuery.substring(0, 47)}...` 
           : latestQuery;
         
-        // Format full conversation log for description
         const formattedHistory = messages
           .map(m => `[${m.role.toUpperCase()}]: ${m.content}`)
           .join('\n\n');
@@ -97,6 +95,46 @@ export default function AISupportWidget() {
     }, 2000);
   };
 
+  // Goal 2: Helper to render markdown code blocks with interactive Copy buttons
+  const renderFormattedMessage = (content: string, msgIndex: number) => {
+    const parts = content.split(/(```[\s\S]*?```)/g);
+
+    return parts.map((part, partIndex) => {
+      if (part.startsWith('```') && part.endsWith('```')) {
+        const firstLineEnd = part.indexOf('\n');
+        const language = part.slice(3, firstLineEnd).trim() || 'code';
+        const code = part.slice(firstLineEnd + 1, -3).trim();
+        const uniqueKey = `${msgIndex}-${partIndex}`;
+        const isCopied = copiedIndex === Number(uniqueKey.replace('-', ''));
+
+        const handleCopy = () => {
+          navigator.clipboard.writeText(code);
+          setCopiedIndex(Number(uniqueKey.replace('-', '')));
+          setTimeout(() => setCopiedIndex(null), 2000);
+        };
+
+        return (
+          <div key={partIndex} className="my-2.5 bg-[#030014] border border-indigo-900/80 rounded-xl overflow-hidden font-mono text-[11px] shadow-lg">
+            <div className="flex items-center justify-between px-3 py-1.5 bg-indigo-950/90 border-b border-indigo-900/50 text-indigo-300">
+              <span className="uppercase tracking-wider text-[10px] text-cyan-400">{language}</span>
+              <button
+                onClick={handleCopy}
+                className="text-[10px] bg-cyan-950/80 hover:bg-cyan-900 text-cyan-300 border border-cyan-800/60 px-2.5 py-0.5 rounded transition shadow-sm"
+              >
+                {isCopied ? 'Copied! ✓' : 'Copy Code 📋'}
+              </button>
+            </div>
+            <pre className="p-3 overflow-x-auto text-cyan-200 leading-relaxed">
+              <code>{code}</code>
+            </pre>
+          </div>
+        );
+      }
+
+      return <p key={partIndex} className="whitespace-pre-wrap leading-relaxed">{part}</p>;
+    });
+  };
+
   return (
     <div className="fixed bottom-6 right-6 z-50 font-sans">
       {/* Floating Toggle Button */}
@@ -113,7 +151,7 @@ export default function AISupportWidget() {
 
       {/* Chat / Support Window Drawer */}
       {isOpen && (
-        <div className="w-[380px] sm:w-[420px] h-[550px] bg-[#0b0f29] border border-indigo-900/80 rounded-3xl shadow-2xl flex flex-col overflow-hidden backdrop-blur-2xl animate-in fade-in slide-in-from-bottom-5 duration-200">
+        <div className="w-[380px] sm:w-[420px] h-[580px] bg-[#0b0f29] border border-indigo-900/80 rounded-3xl shadow-2xl flex flex-col overflow-hidden backdrop-blur-2xl animate-in fade-in slide-in-from-bottom-5 duration-200">
           
           {/* Header */}
           <div className="bg-[#030014]/90 border-b border-indigo-950 px-5 py-4 flex items-center justify-between">
@@ -154,13 +192,13 @@ export default function AISupportWidget() {
                     className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
                   >
                     <div
-                      className={`max-w-[85%] rounded-2xl px-4 py-3 text-xs leading-relaxed ${
+                      className={`max-w-[90%] rounded-2xl px-4 py-3 text-xs leading-relaxed ${
                         msg.role === 'user'
                           ? 'bg-indigo-600 text-white rounded-br-sm shadow-md'
                           : 'bg-indigo-950/60 border border-indigo-900/60 text-indigo-100 rounded-bl-sm shadow-inner'
                       }`}
                     >
-                      {msg.content}
+                      {renderFormattedMessage(msg.content, idx)}
                     </div>
                   </div>
                 ))}
