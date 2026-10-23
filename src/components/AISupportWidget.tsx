@@ -41,14 +41,14 @@ export default function AISupportWidget() {
 
     // Simulate intelligent AI response based on query keywords
     setTimeout(() => {
-      let reply = "I can certainly help with that! Make sure your `mcp_live_` key is properly authorized in your headers. If you're still stuck, you can switch to the 'Contact Support' tab above to escalate this directly to our engineering team.";
+      let reply = "I can certainly help with that! Make sure your `mcp_live_` key is properly authorized in your headers. If you're still stuck, you can switch to the 'Contact Us' tab above to escalate this directly to our engineering team.";
       
       const lower = userMessage.toLowerCase();
       if (lower.includes('proxy') || lower.includes('cloudflare')) {
         reply = "To configure your Cloudflare Edge Proxy, verify your worker route points to `https://webmcp.io/proxy` and that your JSON manifest includes the exact tool definitions required by Claude and ChatGPT.";
-      } else.if (lower.includes('json') || lower.includes('manifest') || lower.includes('well-known')) {
+      } else if (lower.includes('json') || lower.includes('manifest') || lower.includes('well-known')) {
         reply = "Your `/.well-known/mcp.json` manifest must explicitly declare `mcpVersion: \"1.0.0\"` along with your tools array. You can validate your schema right from your dashboard!";
-      } else.if (lower.includes('key') || lower.includes('token') || lower.includes('auth')) {
+      } else if (lower.includes('key') || lower.includes('token') || lower.includes('auth')) {
         reply = "API keys can be generated instantly under the 'API Keys' tab. Ensure you're passing `Authorization: Bearer mcp_live_...` with every agent payload.";
       }
 
@@ -61,7 +61,6 @@ export default function AISupportWidget() {
     e.preventDefault();
     if (!ticketSubject.trim() || !ticketDesc.trim()) return;
     
-    // Here you can hook up ticket submission to Supabase or your backend email
     setTicketSubmitted(true);
     setTimeout(() => {
       setTicketSubmitted(false);
