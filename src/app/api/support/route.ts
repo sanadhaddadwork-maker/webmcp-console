@@ -2,9 +2,8 @@ import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
   try {
-    const { messages } = await req.json();
+    const { messages, userPlan, userEmail } = await req.json();
 
-    // Call your preferred AI provider (e.g., OpenAI or Anthropic)
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -12,15 +11,21 @@ export async function POST(req: Request) {
         'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini', // Fast, intelligent, and cost-effective
+        model: 'gpt-4o',
         messages: [
           {
             role: 'system',
-            content: "You are the lead AI support engineer for WebMCP, an agentic web infrastructure platform. Your job is to help developers configure Cloudflare Edge Proxies, set up /.well-known/mcp.json JSON manifests, manage mcp_live_ API keys, and resolve integration bugs. Be concise, technical, and actionable."
+            content: `You are the lead AI support engineer for WebMCP, an agentic web infrastructure platform. 
+            User Context:
+            - Email: ${userEmail || 'Anonymous Visitor'}
+            - Subscription Plan: ${userPlan || 'Free Tier'}
+            
+            Your job is to help developers configure Cloudflare Edge Proxies, set up /.well-known/mcp.json JSON manifests, manage mcp_live_ API keys, and resolve integration bugs. 
+            If they ask about limits or features restricted to higher tiers, advise them to check the Plans & Pricing tab or upgrade. Provide precise, copy-pasteable code fixes.`
           },
           ...messages
         ],
-        temperature: 0.7,
+        temperature: 0.3,
       })
     });
 
@@ -30,6 +35,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ reply });
   } catch (error) {
     console.error('AI Support Error:', error);
-    return NextResponse.json({ reply: "Sorry, I'm having trouble connecting to the support neural net. Please use the 'Contact Us' tab to submit a human ticket!" }, { status: 500 });
+    return NextResponse.json({ reply: "I encountered a minor glitch connecting to my diagnostics engine. Please switch to the 'Contact Us' tab so our human engineering team can step in immediately!" }, { status: 500 });
   }
 }
