@@ -65,16 +65,16 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     <div className="min-h-screen flex flex-col text-white">
       <header className="border-b border-indigo-950 bg-[#030014]/80 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 font-bold text-lg text-white">
+          <Link href="/" prefetch={true} className="flex items-center gap-2 font-bold text-lg text-white">
             <span className="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-600 to-cyan-400 flex items-center justify-center text-xs font-mono">W</span>
             WebMCP <span className="text-[10px] bg-indigo-950 text-indigo-400 border border-indigo-800/60 px-2 py-0.5 rounded-md font-mono">CONSOLE</span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-6 text-xs font-medium text-indigo-200">
-            <Link href="/" className={`hover:text-cyan-400 transition ${pathname === '/' ? 'text-cyan-400 font-bold' : ''}`}>Home</Link>
-            <Link href="/plans" className={`hover:text-cyan-400 transition ${pathname === '/plans' ? 'text-cyan-400 font-bold' : ''}`}>Plans & Pricing</Link>
-            <Link href="/keys" className={`hover:text-cyan-400 transition ${pathname === '/keys' ? 'text-cyan-400 font-bold' : ''}`}>API Keys</Link>
-            <Link href="/analytics" className={`hover:text-cyan-400 transition ${pathname === '/analytics' ? 'text-cyan-400 font-bold' : ''}`}>Telemetry</Link>
+            <Link href="/" prefetch={true} className={`hover:text-cyan-400 transition ${pathname === '/' ? 'text-cyan-400 font-bold' : ''}`}>Home</Link>
+            <Link href="/plans" prefetch={true} className={`hover:text-cyan-400 transition ${pathname === '/plans' ? 'text-cyan-400 font-bold' : ''}`}>Plans & Pricing</Link>
+            <Link href="/keys" prefetch={true} className={`hover:text-cyan-400 transition ${pathname === '/keys' ? 'text-cyan-400 font-bold' : ''}`}>API Keys</Link>
+            <Link href="/analytics" prefetch={true} className={`hover:text-cyan-400 transition ${pathname === '/analytics' ? 'text-cyan-400 font-bold' : ''}`}>Telemetry</Link>
           </nav>
 
           <div className="flex items-center gap-4">
@@ -105,19 +105,19 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                     </div>
 
                     <div className="space-y-1 text-xs">
-                      <Link href="/" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-white transition">
+                      <Link href="/" prefetch={true} onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-white transition">
                         🏠 <span>Home</span>
                       </Link>
-                      <Link href="/analytics" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-white transition">
+                      <Link href="/analytics" prefetch={true} onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-white transition">
                         📊 <span>Telemetry & Analytics</span>
                       </Link>
-                      <Link href="/plans" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-white transition">
+                      <Link href="/plans" prefetch={true} onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-white transition">
                         ⚡ <span>Plans & Pricing</span>
                       </Link>
-                      <Link href="/keys" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-white transition">
+                      <Link href="/keys" prefetch={true} onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-white transition">
                         🔑 <span>API Keys & Proxies</span>
                       </Link>
-                      <Link href="/settings" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-cyan-400 transition font-medium">
+                      <Link href="/settings" prefetch={true} onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-indigo-200 hover:bg-indigo-950/70 hover:text-cyan-400 transition font-medium">
                         ⚙️ <span>Settings</span>
                       </Link>
                     </div>
@@ -132,10 +132,10 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
               </div>
             ) : (
               <div className="flex items-center gap-3">
-                <Link href="/login" className="text-xs font-medium text-indigo-200 hover:text-white px-3 py-2 transition">
+                <Link href="/login" prefetch={true} className="text-xs font-medium text-indigo-200 hover:text-white px-3 py-2 transition">
                   Log In
                 </Link>
-                <Link href="/signup" className="text-xs font-bold text-white bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 px-4 py-2 rounded-xl transition shadow-lg shadow-indigo-600/30">
+                <Link href="/signup" prefetch={true} className="text-xs font-bold text-white bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 px-4 py-2 rounded-xl transition shadow-lg shadow-indigo-600/30">
                   Sign Up
                 </Link>
               </div>
