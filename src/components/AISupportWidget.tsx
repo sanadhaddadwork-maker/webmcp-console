@@ -30,31 +30,30 @@ export default function AISupportWidget() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
 
     const userMessage = input.trim();
-    setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+    const newMessages = [...messages, { role: 'user' as const, content: userMessage }];
+    setMessages(newMessages);
     setInput('');
     setIsTyping(true);
 
-    // Simulate intelligent AI response based on query keywords
-    setTimeout(() => {
-      let reply = "I can certainly help with that! Make sure your `mcp_live_` key is properly authorized in your headers. If you're still stuck, you can switch to the 'Contact Us' tab above to escalate this directly to our engineering team.";
-      
-      const lower = userMessage.toLowerCase();
-      if (lower.includes('proxy') || lower.includes('cloudflare')) {
-        reply = "To configure your Cloudflare Edge Proxy, verify your worker route points to `https://webmcp.io/proxy` and that your JSON manifest includes the exact tool definitions required by Claude and ChatGPT.";
-      } else if (lower.includes('json') || lower.includes('manifest') || lower.includes('well-known')) {
-        reply = "Your `/.well-known/mcp.json` manifest must explicitly declare `mcpVersion: \"1.0.0\"` along with your tools array. You can validate your schema right from your dashboard!";
-      } else if (lower.includes('key') || lower.includes('token') || lower.includes('auth')) {
-        reply = "API keys can be generated instantly under the 'API Keys' tab. Ensure you're passing `Authorization: Bearer mcp_live_...` with every agent payload.";
-      }
+    try {
+      const res = await fetch('/api/support', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: newMessages })
+      });
 
-      setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
+      const data = await res.json();
+      setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
+    } catch (err) {
+      setMessages(prev => [...prev, { role: 'assistant', content: "Network error connecting to the support net. Please try again or submit a support ticket via the 'Contact Us' tab." }]);
+    } finally {
       setIsTyping(false);
-    }, 1000);
+    }
   };
 
   const handleTicketSubmit = (e: React.FormEvent) => {
