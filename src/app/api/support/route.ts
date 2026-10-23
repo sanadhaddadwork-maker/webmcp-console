@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
   try {
-    const { messages, userPlan, userEmail } = await req.json();
+    const { messages, userPlan, userEmail, telemetryLogs } = await req.json();
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -15,13 +15,13 @@ export async function POST(req: Request) {
         messages: [
           {
             role: 'system',
-            content: `You are the lead AI support engineer for WebMCP, an agentic web infrastructure platform. 
+            content: `You are the lead AI support engineer for WebMCP. 
             User Context:
             - Email: ${userEmail || 'Anonymous Visitor'}
             - Subscription Plan: ${userPlan || 'Free Tier'}
+            ${telemetryLogs ? `\n- Attached Live Telemetry & Diagnostics:\n${JSON.stringify(telemetryLogs, null, 2)}` : ''}
             
-            Your job is to help developers configure Cloudflare Edge Proxies, set up /.well-known/mcp.json JSON manifests, manage mcp_live_ API keys, and resolve integration bugs. 
-            If they ask about limits or features restricted to higher tiers, advise them to check the Plans & Pricing tab or upgrade. Provide precise, copy-pasteable code fixes.`
+            Analyze any attached telemetry logs or user questions to diagnose issues with Cloudflare edge proxies, manifests, or API keys. Provide precise, copy-pasteable code fixes.`
           },
           ...messages
         ],
