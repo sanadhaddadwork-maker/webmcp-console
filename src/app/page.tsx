@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 
 export default function HomePage() {
@@ -5,7 +7,6 @@ export default function HomePage() {
     <div className="max-w-7xl mx-auto space-y-28 py-10 bg-transparent">
       {/* Hero Section */}
       <section className="text-center space-y-8 pt-12 pb-8 relative">
-        {/* Optimized blur layer with will-change for GPU acceleration */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[100px] pointer-events-none will-change-transform"></div>
         
         <div className="relative z-10 space-y-6 max-w-4xl mx-auto">
