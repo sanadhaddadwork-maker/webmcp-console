@@ -19,7 +19,6 @@ export default function SettingsPage() {
   const [region, setRegion] = useState('auto-edge');
   const [notif, setNotif] = useState(true);
 
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
@@ -63,8 +62,6 @@ export default function SettingsPage() {
         if (b.region) setRegion(b.region);
         if (b.language) setLang(b.language);
       }
-      
-      if (isMounted) setLoading(false);
     }
 
     loadSettings();
@@ -72,7 +69,7 @@ export default function SettingsPage() {
     return () => {
       isMounted = false;
     };
-  }, []); // Run strictly once on mount
+  }, [router]);
 
   const handleSaveAll = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -103,17 +100,6 @@ export default function SettingsPage() {
       setSaving(false);
     }
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="flex items-center gap-3 text-indigo-300 text-xs font-mono">
-          <div className="w-4 h-4 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
-          <span>Synchronizing enterprise environment...</span>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="max-w-5xl mx-auto py-12 px-6 space-y-8 text-white relative">
