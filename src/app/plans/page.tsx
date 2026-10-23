@@ -10,12 +10,15 @@ export default function PlansPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [business, setBusiness] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+
     async function loadUserData() {
       try {
         const { data: { user } } = await supabase.auth.getUser();
+        if (!isMounted) return;
+
         if (user) {
           setUser(user);
           
@@ -25,21 +28,23 @@ export default function PlansPage() {
             .eq('work_email', user.email)
             .maybeSingle();
 
-          if (bizData) {
+          if (bizData && isMounted) {
             setBusiness(bizData);
-          } else {
+          } else if (isMounted) {
             setBusiness({ plan: 'Free Tier', business_name: 'My Account', work_email: user.email });
           }
         }
       } catch (err) {
         console.error('Error loading user on plans page:', err);
-      } finally {
-        setLoading(false);
       }
     }
 
     loadUserData();
-  }, []); // Run once on mount
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleSelectPlan = (planId: string) => {
     if (!user) {
@@ -62,17 +67,17 @@ export default function PlansPage() {
           Choose the right scale for your agent proxy infrastructure with secure checkout confirmation.
         </p>
 
-        {!loading && user && (
-          <div className="mt-6 inline-flex items-center gap-3 px-4 py-2 rounded-xl bg-indigo-950/60 border border-indigo-800/50 text-xs text-indigo-200 backdrop-blur-md">
+        {user && (
+          <div className="mt-6 inline-flex items-center gap-3 px-4 py-2 rounded-xl bg-indigo-950/60 border border-indigo-800/50 text-xs text-indigo-200 backdrop-blur-md animate-fadeIn">
             <span>Account: <strong className="text-white">{business?.business_name || 'My Account'}</strong> ({user.email})</span>
             <span className="text-indigo-500">•</span>
-            <span>Active Plan: <strong className="text-cyan-400">{currentPlan}</strong></span>
+            <span>Active Plan: <strong className="text-cyan-400">{currentPlan || 'Free Tier'}</strong></span>
           </div>
         )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className={`rounded-2xl p-6 bg-[#0b0f29]/80 border backdrop-blur-md flex flex-col justify-between transition-all ${currentPlan === 'Free Tier' ? 'border-cyan-500 shadow-lg shadow-cyan-500/20' : 'border-indigo-900/50'}`}>
+        <div className={`rounded-2xl p-6 bg-[#0b0f29]/80 border backdrop-blur-md flex flex-col justify-between transition-all ${currentPlan === 'Free Tier' ? 'border-cyan-500 shadow-lg shadow-cyan-500/25' : 'border-indigo-900/50'}`}>
           <div>
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-bold text-white">Free Tier</h3>
@@ -94,7 +99,7 @@ export default function PlansPage() {
           </button>
         </div>
 
-        <div className={`rounded-2xl p-6 bg-[#0b0f29]/80 border backdrop-blur-md flex flex-col justify-between transition-all ${currentPlan === 'Starter' ? 'border-cyan-500 shadow-lg shadow-cyan-500/20' : 'border-indigo-900/50'}`}>
+        <div className={`rounded-2xl p-6 bg-[#0b0f29]/80 border backdrop-blur-md flex flex-col justify-between transition-all ${currentPlan === 'Starter' ? 'border-cyan-500 shadow-lg shadow-cyan-500/25' : 'border-indigo-900/50'}`}>
           <div>
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-bold text-white">Starter</h3>
@@ -116,7 +121,7 @@ export default function PlansPage() {
           </button>
         </div>
 
-        <div className={`rounded-2xl p-6 bg-[#0b0f29]/80 border backdrop-blur-md flex flex-col justify-between transition-all relative ${currentPlan === 'Pro Tier' ? 'border-cyan-500 shadow-lg shadow-cyan-500/20' : 'border-indigo-600/60 shadow-xl shadow-indigo-600/10'}`}>
+        <div className={`rounded-2xl p-6 bg-[#0b0f29]/80 border backdrop-blur-md flex flex-col justify-between transition-all relative ${currentPlan === 'Pro Tier' ? 'border-cyan-500 shadow-lg shadow-cyan-500/25' : 'border-indigo-600/60 shadow-xl shadow-indigo-600/10'}`}>
           <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-indigo-600 to-cyan-500 text-white text-[10px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wider shadow-md">
             Most Popular
           </div>
@@ -141,7 +146,7 @@ export default function PlansPage() {
           </button>
         </div>
 
-        <div className={`rounded-2xl p-6 bg-[#0b0f29]/80 border backdrop-blur-md flex flex-col justify-between transition-all ${currentPlan === 'Enterprise' ? 'border-cyan-500 shadow-lg shadow-cyan-500/20' : 'border-indigo-900/50'}`}>
+        <div className={`rounded-2xl p-6 bg-[#0b0f29]/80 border backdrop-blur-md flex flex-col justify-between transition-all ${currentPlan === 'Enterprise' ? 'border-cyan-500 shadow-lg shadow-cyan-500/25' : 'border-indigo-900/50'}`}>
           <div>
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-bold text-white">Enterprise</h3>
