@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useTransition } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabaseBrowser';
+import AISupportWidget from '@/components/AISupportWidget';
 
 const supabase = createClient();
 
@@ -159,6 +160,9 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       <main className="flex-1">
         {children}
       </main>
+
+      {/* Floating AI Support Assistant Widget */}
+      <AISupportWidget />
     </div>
   );
 }
