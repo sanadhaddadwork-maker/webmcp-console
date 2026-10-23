@@ -11,14 +11,14 @@ interface ApiKey {
   created_at: string;
 }
 
+const supabase = createClient();
+
 export default function ApiKeysPage() {
   const [keys, setKeys] = useState<ApiKey[]>([]);
   const [labelInput, setLabelInput] = useState('');
-  const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const router = useRouter();
-  const supabase = createClient();
 
   useEffect(() => {
     let isMounted = true;
@@ -28,7 +28,7 @@ export default function ApiKeysPage() {
         const { data: { user } } = await supabase.auth.getUser();
 
         if (!user) {
-          if (isMounted) router.replace('/login?redirect=/api-keys');
+          if (isMounted) router.replace('/login?redirect=/keys');
           return;
         }
 
@@ -44,8 +44,6 @@ export default function ApiKeysPage() {
         }
       } catch (err) {
         console.error('Failed to fetch keys:', err);
-      } finally {
-        if (isMounted) setLoading(false);
       }
     }
 
@@ -54,7 +52,7 @@ export default function ApiKeysPage() {
     return () => {
       isMounted = false;
     };
-  }, [supabase, router]);
+  }, [router]);
 
   async function generateKey(e: React.FormEvent) {
     e.preventDefault();
@@ -66,7 +64,7 @@ export default function ApiKeysPage() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        router.replace('/login?redirect=/api-keys');
+        router.replace('/login?redirect=/keys');
         return;
       }
 
@@ -110,17 +108,6 @@ export default function ApiKeysPage() {
     setCopiedKey(keyStr);
     setTimeout(() => setCopiedKey(null), 2000);
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="flex items-center gap-3 text-indigo-300 text-xs font-mono">
-          <div className="w-4 h-4 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
-          <span>Authenticating session...</span>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="max-w-4xl mx-auto py-12 px-6 space-y-10">
